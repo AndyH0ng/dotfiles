@@ -30,6 +30,26 @@ chezmoi는 심링크 모드로 동작한다. `~/.zshrc` 같은 일반 파일은 
 - **테마**: `.chezmoidata/theme.toml`을 고치고 `chezmoi apply`.
 - **Claude Code 설정**: `~/.claude/settings.json`은 [`claude-settings.json`](claude-settings.json)으로부터 `modify_` 스크립트가 생성한다. 이 스크립트는 머신별 `autoMode` 블록을 git 밖에 둔다. `/config`로 설정을 바꿨다면 `claude-sync`로 저장소에 다시 반영한다.
 
+## Chrome Canary 연결 (chrome-devtools MCP)
+
+Claude Code의 chrome-devtools MCP는 별도 창을 띄우지 않고, **이미 켜져 있는 Chrome Canary(로그인된 프로필)에 붙는다.** 설치 스크립트가 `claude mcp add`로 아래 설정을 등록한다.
+
+```sh
+bunx chrome-devtools-mcp@latest --autoConnect --channel canary --no-usage-statistics
+```
+
+처음 한 번:
+
+1. Canary를 켜고 `chrome://inspect/#remote-debugging`에서 원격 디버깅을 켠다.
+2. Claude Code를 재시작한다.
+3. 첫 연결 때 Canary에 뜨는 허용 창에서 허용한다.
+
+주의할 점:
+
+- Canary가 미리 켜져 있어야 한다. MCP가 직접 실행하지 않는다.
+- 에이전트가 로그인된 계정 그대로 페이지를 조작할 수 있다. 원격 디버깅은 필요할 때만 켜 두는 게 좋다.
+- 같은 기능의 `chrome-devtools-mcp` 플러그인은 일반 Chrome용이라 꺼 뒀다.
+
 ## 유지보수
 
 - `dotfiles-doctor`(에이전트용은 `dotfiles-doctor --json`)는 어긋난 부분을 보여준다: 저장소와 다른 파일, 설치 안 됐거나 Brewfile에 없는 패키지, Claude 설정 불일치, 커밋·push 안 한 변경.
