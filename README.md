@@ -16,7 +16,7 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply AndyH0ng
 - **터미널**: 커스텀 아이콘을 쓴 [Ghostty](https://ghostty.org), IBM Plex Mono + D2Coding + Nerd Font 심볼
 - **테마**: base16-snazzy. [`.chezmoidata/theme.toml`](.chezmoidata/theme.toml) 한 곳에서 정의하고 Ghostty, starship, Claude Code 상태바, [tinty](https://github.com/tinted-theming/tinty)(쉘 + fzf), `vivid`(`LS_COLORS`)에 반영
 - **도구**: mise(언어 런타임), zoxide, fzf, atuin(인라인, 10줄), eza, bat, ripgrep, fd, xh, fastfetch
-- **Python**: uv, ruff, ty
+- **Python**: uv, ruff, [pyrefly](https://pyrefly.org)(타입 체커)
 - **Git**: 최신 기본값(histogram diff, zdiff3, rerere, autoSetupRemote), pager로 [delta](https://github.com/dandavison/delta) 사용(lazygit 포함), 서명 키가 있을 때만 SSH 커밋 서명
 - **Claude Code**: `settings.json`(플러그인, 테마, 상태바)과 base16-snazzy [상태바](dot_claude/executable_statusline.sh.tmpl)
 - **프라이버시**: Homebrew, gh, Claude Code, Codex, CodeRabbit, 주요 JS 도구의 텔레메트리 끔(`.zshenv`의 `DO_NOT_TRACK` 등)

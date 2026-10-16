@@ -34,6 +34,7 @@ Guide for AI agents (and humans) changing this dotfiles repo. It is managed with
   - A new optional group needs: the file, a `promptBoolOnce` in `.chezmoi.toml.tmpl`, a hash line + `if` block in the install script, an entry in `.chezmoiignore`, and its prompt text in the CI `--promptBool` (chezmoi matches `--promptBool` by **prompt text**, not data key, and splits on commas — so prompt text must not contain commas).
   - Formulae from third-party taps need an explicit `brew trust --formula|--cask <full/name>` line in the install script (Homebrew 7 refuses untrusted taps). Trust the single formula, not the whole tap.
   - The install script uses `brew bundle --no-upgrade`. Without it, every Brewfile change also upgrades every outdated package (minutes of big cask downloads). Upgrades are a separate, deliberate `brew upgrade`.
+  - Python CLIs not in Homebrew (e.g. `pyrefly`) are installed with `uv tool install` in the install script and land in `~/.local/bin`.
   - Some formulae aren't binaries (e.g. `antidote` is a sourced zsh script). Don't check them with `command -v`.
 - **A shell shortcut:** use `zsh-abbr` in `dot_zshrc`, not `alias`, so agents and pasted commands still get the real tool. Shadowing an existing command needs `abbr -S -q -f … >/dev/null` (without `-f` it silently refuses).
 - **An env var for every shell** (PATH, telemetry opt-outs): `dot_zshenv`. Login-shell-only setup: `dot_zprofile`. Interactive-only: `dot_zshrc`.
