@@ -11,11 +11,3 @@ cd "$HOME" && mise install --yes
 tinty install
 tinty apply {{ .theme.scheme | quote }}
 
-# Claude Code MCP: attach to the already-running Chrome Canary (logged-in
-# profile) instead of launching a separate one. Needs remote debugging on in
-# chrome://inspect/#remote-debugging. Remove first so arg changes apply.
-if command -v claude >/dev/null 2>&1; then
-  claude mcp remove chrome-devtools -s user >/dev/null 2>&1 || true
-  claude mcp add chrome-devtools -s user -- \
-    bunx chrome-devtools-mcp@latest --autoConnect --channel canary --no-usage-statistics
-fi

@@ -18,8 +18,8 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 | `Brewfile` | Everything the dotfiles depend on |
 | `Brewfile.<group>` | One file per optional group (opt-in, stored as `.install.<group>`). Keep them to essentials only. |
 | `uv-tools.txt` | Python CLIs installed with `uv tool install` (e.g. pyrefly) |
-| `run_onchange_before_install-packages.sh.tmpl` | brew bundle, tap trust, uv tools, gh/codex telemetry, git hooks path |
-| `run_onchange_after_setup.sh.tmpl` | `mise install`, tinty theme, Claude Code MCP servers (`claude mcp add`) |
+| `run_onchange_before_install-packages.sh.tmpl` | brew bundle, tap trust, uv tools, gh/codex telemetry, Claude Code MCP servers, git hooks path |
+| `run_onchange_after_setup.sh.tmpl` | `mise install`, tinty theme |
 | `claude-settings.json` | Source for `~/.claude/settings.json` (see below) |
 | `dot_local/bin/` | `claude-sync`, `dotfiles-doctor` |
 | `.githooks/pre-commit` | gitleaks on staged changes |
@@ -61,5 +61,6 @@ Note: `claude-code@latest` and `chrome-devtools-mcp@latest` float on purpose, so
 
 - Don't commit `~/.claude.json`, history, tokens, `autoMode`, or anything under `~/.ssh` except public-safe references.
 - Don't edit rendered template output in `$HOME`.
+- Don't run `claude …` commands in the after-script: on a fresh Mac the first run rewrites `~/.claude/settings.json` and leaves drift. Put them in the before-script.
 - Don't add aliases that shadow POSIX tools.
 - Don't pin third-party GitHub Actions by tag only. Prefer first-party actions or run the tool directly.

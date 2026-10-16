@@ -38,5 +38,16 @@ if command -v codex >/dev/null 2>&1; then
     || printf '\n[analytics]\nenabled = false\n' >> "$HOME/.codex/config.toml"
 fi
 
+# Claude Code MCP (runs before files are written: the first `claude`
+# invocation on a fresh Mac touches ~/.claude/settings.json, which chezmoi
+# then overwrites with the repo version). Attach to the already-running Chrome Canary (logged-in
+# profile) instead of launching a separate one. Needs remote debugging on in
+# chrome://inspect/#remote-debugging. Remove first so arg changes apply.
+if command -v claude >/dev/null 2>&1; then
+  claude mcp remove chrome-devtools -s user >/dev/null 2>&1 || true
+  claude mcp add chrome-devtools -s user -- \
+    bunx chrome-devtools-mcp@latest --autoConnect --channel canary --no-usage-statistics
+fi
+
 # block commits that contain secrets (this repo is public)
 git -C "{{ .chezmoi.sourceDir }}" config core.hooksPath .githooks
