@@ -28,7 +28,8 @@ jobs:
       - name: Tools on PATH
         run: |
           eval "$(/opt/homebrew/bin/brew shellenv)"
-          for t in antidote starship vivid tinty mise zoxide fzf atuin eza bat rg fd uv ruff ty jq xh gitleaks; do
+          test -f "$(brew --prefix)/opt/antidote/share/antidote/antidote.zsh"  # antidote is a sourced zsh function, not a binary
+          for t in starship vivid tinty mise zoxide fzf atuin eza bat rg fd uv ruff ty jq xh gitleaks; do
             command -v "$t" >/dev/null || { echo "missing: $t"; exit 1; }
           done
 
