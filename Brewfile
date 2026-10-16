@@ -1,9 +1,11 @@
+tap "tinted-theming/tinted"
+
 # shell
 brew "antidote"
 brew "starship"
 brew "zsh-patina"
 brew "vivid"
-brew "tinty"
+brew "tinted-theming/tinted/tinty"
 brew "fastfetch"
 
 # tools referenced in .zshrc
