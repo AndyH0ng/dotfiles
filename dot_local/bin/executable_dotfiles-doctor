@@ -1,0 +1,40 @@
+#!/bin/sh
+# Report drift between ~/dotfiles and this machine. Changes nothing.
+src=$(chezmoi source-path)
+ok=1
+section() { printf '\n\033[1m%s\033[0m\n' "$1"; }
+
+section "chezmoi: files that differ from the repo"
+out=$(chezmoi status --exclude scripts)
+if [ -n "$out" ]; then echo "$out"; ok=0; else echo "  none"; fi
+
+section "Brewfile: listed but not installed"
+if brew bundle check --file="$src/Brewfile" --no-upgrade >/dev/null 2>&1; then
+  echo "  none"
+else
+  brew bundle check --file="$src/Brewfile" --no-upgrade --verbose 2>&1 | sed 's/^/  /'; ok=0
+fi
+
+section "Brewfile: installed but not listed (informational)"
+extra=$(brew bundle cleanup --file="$src/Brewfile" 2>/dev/null | grep -vE '^(Would|Run )' | tr '\n' ' ')
+if [ -n "$extra" ]; then echo "  $extra" | fold -s -w 100; else echo "  none"; fi
+
+section "Claude Code settings vs claude-settings.json"
+if jq 'del(.autoMode)' "$HOME/.claude/settings.json" | diff -q - "$src/claude-settings.json" >/dev/null; then
+  echo "  in sync"
+else
+  echo "  out of sync — run claude-sync"; ok=0
+fi
+
+section "git: uncommitted or unpushed"
+git -C "$src" fetch -q 2>/dev/null
+st=$(git -C "$src" status --short)
+ahead=$(git -C "$src" rev-list --count @{u}..HEAD 2>/dev/null || echo 0)
+behind=$(git -C "$src" rev-list --count HEAD..@{u} 2>/dev/null || echo 0)
+[ -n "$st" ] && { echo "$st" | sed 's/^/  /'; ok=0; }
+[ "$ahead" -gt 0 ] && { echo "  $ahead commit(s) not pushed"; ok=0; }
+[ "$behind" -gt 0 ] && { echo "  $behind commit(s) behind origin — run chezmoi update"; ok=0; }
+[ -z "$st" ] && [ "$ahead" -eq 0 ] && [ "$behind" -eq 0 ] && echo "  clean"
+
+echo
+[ "$ok" -eq 1 ] && echo "✓ all good" || echo "✗ drift found"

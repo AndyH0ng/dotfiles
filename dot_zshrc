@@ -39,9 +39,12 @@ alias ls='eza --icons --group-directories-first'
 alias ll='eza -l --icons --group-directories-first'
 alias la='eza -la --icons --group-directories-first'
 alias tree='eza --tree --icons'
-alias cat='bat --style=plain'
-alias grep='rg'
-alias find='fd'
+# cat/grep/find are abbreviations, not aliases: they expand on space so
+# you see what runs, and pasted commands using POSIX flags still work
+# (delete the expansion to get the original tool)
+abbr -S -q -f cat='bat --style=plain' >/dev/null
+abbr -S -q -f grep='rg' >/dev/null
+abbr -S -q -f find='fd' >/dev/null
 
 # ---- history ----
 HISTFILE=~/.zsh_history

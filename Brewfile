@@ -19,6 +19,8 @@ brew "uv"
 brew "ruff"
 brew "ty"
 brew "jq"
+brew "xh"
+brew "gitleaks"
 
 # terminal + fonts
 cask "ghostty"

@@ -1,0 +1,12 @@
+#!/bin/bash
+# Runs after files are written, so mise's and tinty's configs are in place.
+# mise config hash: {{ include "dot_config/mise/config.toml" | sha256sum }}
+# theme: {{ .theme.scheme }}
+set -euo pipefail
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# language runtimes come from mise (brew is for CLIs and apps)
+cd "$HOME" && mise install --yes
+
+tinty install
+tinty apply {{ .theme.scheme | quote }}

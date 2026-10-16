@@ -1,0 +1,21 @@
+#!/bin/bash
+# Runs before files are written, so tools like jq exist for modify_ scripts.
+# Brewfile hash: {{ include "Brewfile" | sha256sum }}
+set -euo pipefail
+
+if ! command -v brew >/dev/null 2>&1; then
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+brew analytics off
+brew bundle --file="{{ .chezmoi.sourceDir }}/Brewfile"
+
+# telemetry settings that live in each tool's own config, not env vars
+gh config set telemetry disabled
+mkdir -p "$HOME/.codex" && touch "$HOME/.codex/config.toml"
+grep -q '^\[analytics\]' "$HOME/.codex/config.toml" \
+  || printf '\n[analytics]\nenabled = false\n' >> "$HOME/.codex/config.toml"
+
+# block commits that contain secrets (this repo is public)
+git -C "{{ .chezmoi.sourceDir }}" config core.hooksPath .githooks
