@@ -17,7 +17,7 @@ This installs Homebrew if needed, runs `brew bundle` with the [Brewfile](Brewfil
 - **Theme**: base16-snazzy, defined once in [`.chezmoidata/theme.toml`](.chezmoidata/theme.toml) and rendered into Ghostty, starship, the Claude Code statusline, [tinty](https://github.com/tinted-theming/tinty) (shell + fzf) and `vivid` (`LS_COLORS`)
 - **Tools**: mise, zoxide, fzf, atuin, eza, bat, ripgrep, fd, fastfetch
 - **Python**: uv, ruff, ty
-- **Claude Code**: `settings.json` (plugins, theme, statusline) and a base16-snazzy [statusline](dot_claude/executable_statusline.sh)
+- **Claude Code**: `settings.json` (plugins, theme, statusline) and a base16-snazzy [statusline](dot_claude/executable_statusline.sh.tmpl)
 
 ## Editing
 
