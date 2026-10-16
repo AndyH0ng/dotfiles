@@ -1,0 +1,63 @@
+# ~/.zshrc
+
+# ---- completion ----
+autoload -Uz compinit
+if [[ -n ${HOME}/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
+fi
+
+export LS_COLORS="$(vivid generate snazzy)"
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+
+# ---- tinty ----
+export BASE16_SHELL_SET_BACKGROUND=false
+TINTY_ARTIFACTS="$HOME/.local/share/tinted-theming/tinty/artifacts"
+[ -f "$TINTY_ARTIFACTS/tinted-shell-scripts-file.sh" ] && . "$TINTY_ARTIFACTS/tinted-shell-scripts-file.sh"
+[ -f "$TINTY_ARTIFACTS/tinted-fzf-sh-file.sh" ] && . "$TINTY_ARTIFACTS/tinted-fzf-sh-file.sh"
+
+# ---- antidote ----
+source /opt/homebrew/opt/antidote/share/antidote/antidote.zsh
+antidote load ~/.zsh_plugins.txt
+
+# ---- prompt ----
+eval "$(starship init zsh)"
+
+# ---- dev tooling ----
+eval "$(mise activate zsh)"
+eval "$(zoxide init zsh)"
+source <(fzf --zsh)
+eval "$(atuin init zsh)"
+
+export PATH="$HOME/.bun/bin:$PATH"
+
+# ---- modern CLI replacements ----
+alias ls='eza --icons --group-directories-first'
+alias ll='eza -l --icons --group-directories-first'
+alias la='eza -la --icons --group-directories-first'
+alias tree='eza --tree --icons'
+alias cat='bat --style=plain'
+alias grep='rg'
+alias find='fd'
+
+# ---- history ----
+HISTFILE=~/.zsh_history
+HISTSIZE=50000
+SAVEHIST=50000
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+setopt SHARE_HISTORY
+setopt INC_APPEND_HISTORY
+
+# ---- syntax highlighting (must be last) ----
+eval "$(/opt/homebrew/opt/zsh-patina/bin/zsh-patina activate)"
+
+# ---- fastfetch (once, right before the first prompt draws so the
+# terminal has reported its real size — avoids the logo misaligning) ----
+autoload -Uz add-zsh-hook
+_fastfetch_once() {
+  fastfetch
+  add-zsh-hook -d precmd _fastfetch_once
+}
+add-zsh-hook precmd _fastfetch_once

@@ -1,0 +1,16 @@
+shell = "sh -c '{}'"
+default-scheme = "base16-snazzy"
+
+[[items]]
+name = "tinted-shell"
+path = "https://github.com/tinted-theming/tinted-shell"
+hook = ". %f"
+supported-systems = ["base16"]
+themes-dir = "scripts"
+
+[[items]]
+name = "tinted-fzf"
+path = "https://github.com/tinted-theming/tinted-fzf"
+hook = ". %f"
+supported-systems = ["base16"]
+themes-dir = "sh"
