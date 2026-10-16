@@ -1,4 +1,4 @@
-# Single source of truth for the color theme. Ghostty, starship, tinty,
+# Single source of truth for the terminal look: colors and fonts. Ghostty, starship, tinty,
 # vivid and the Claude Code statusline are all rendered from this file.
 # To switch themes: change the names below, copy the palette from
 # ~/.local/share/tinted-theming/tinty/repos/schemes/base16/<scheme>.yaml,
@@ -25,3 +25,22 @@ base0C = "9aedfe"
 base0D = "57c7ff"
 base0E = "ff6ac1"
 base0F = "b2643c"
+
+# Terminal fonts, in fallback order. Ghostty is rendered from this list.
+# Brewfile can't be templated, so each cask is also listed there;
+# dotfiles-doctor fails if a cask is missing from Brewfile or Ghostty
+# can't find a family by this exact name (`ghostty +list-fonts`).
+[theme.font]
+size = 14
+
+[[theme.font.families]]
+name = "IBM Plex Mono"            # Latin
+cask = "font-ibm-plex-mono"
+
+[[theme.font.families]]
+name = "D2Coding"                 # Hangul
+cask = "font-d2coding"
+
+[[theme.font.families]]
+name = "Symbols Nerd Font Mono"   # icons
+cask = "font-symbols-only-nerd-font"

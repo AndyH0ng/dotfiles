@@ -19,10 +19,11 @@ palette = 15=#{{ $p.base07 }}
 foreground = #{{ $p.base05 }}
 background = #{{ .theme.background }}
 
-font-family = IBM Plex Mono
-font-family = D2Coding
-font-family = Symbols Nerd Font Mono
-font-size = 14
+# fonts come from .chezmoidata/theme.toml (fallback order)
+{{- range .theme.font.families }}
+font-family = {{ .name }}
+{{- end }}
+font-size = {{ .theme.font.size }}
 
 background-opacity = 0.85
 background-blur = true

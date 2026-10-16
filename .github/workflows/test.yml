@@ -45,7 +45,8 @@ jobs:
           export PATH="$HOME/.local/bin:$PATH"
           dotfiles-doctor --json | tee "$RUNNER_TEMP/doctor.json" || true
           jq -e '.chezmoi_drift == [] and .brew.missing == [] and .uv_tools_missing == []
-                 and .theme_mismatch == [] and .claude_settings_in_sync' "$RUNNER_TEMP/doctor.json"
+                 and .theme_mismatch == [] and .font_mismatch == []
+                 and .telemetry_on == [] and .claude_settings_in_sync' "$RUNNER_TEMP/doctor.json"
 
       - name: Optional Brewfiles reference real packages
         # optional groups are off above, so at least check every name resolves

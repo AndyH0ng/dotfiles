@@ -46,6 +46,17 @@ else
   theme_mismatch="scheme file not found: $scheme_yaml (run tinty install)"
 fi
 
+# terminal fonts in theme.toml: cask listed in Brewfile, family visible to Ghostty
+ghostty_bin=$(command -v ghostty || echo /Applications/Ghostty.app/Contents/MacOS/ghostty)
+ghostty_fonts=$("$ghostty_bin" +list-fonts 2>/dev/null)
+font_mismatch=$(printf '%s' "$data" | jq -r '.theme.font.families[] | "\(.cask)\t\(.name)"' \
+  | while IFS="$(printf '\t')" read -r cask name; do
+      grep -q "^cask \"$cask\"" "$src/Brewfile" || echo "$cask (for \"$name\") is not in Brewfile"
+      if [ -n "$ghostty_fonts" ]; then
+        printf '%s\n' "$ghostty_fonts" | grep -qx "$name" || echo "Ghostty can't find font family \"$name\""
+      fi
+    done)
+
 # Claude Code settings vs the repo copy (same stripping rules as claude-sync)
 if "$HOME/.local/bin/claude-sync" --check; then claude_sync=true; else claude_sync=false; fi
 
@@ -70,7 +81,7 @@ behind=$(git -C "$src" rev-list --count 'HEAD..@{u}' 2>/dev/null || echo 0)
 
 ok=true
 # unlisted packages are informational: installed by hand, not managed
-[ -n "$chezmoi_drift$brew_missing$uv_missing$theme_mismatch$telemetry_off$git_status" ] && ok=false
+[ -n "$chezmoi_drift$brew_missing$uv_missing$theme_mismatch$font_mismatch$telemetry_off$git_status" ] && ok=false
 [ "$claude_sync" = false ] || [ "$ahead" -gt 0 ] || [ "$behind" -gt 0 ] && ok=false
 
 lines() { printf '%s\n' "$1" | jq -R . | jq -s 'map(select(length > 0))'; }
@@ -84,6 +95,7 @@ if [ "${1:-}" = "--json" ]; then
     --argjson uv "$(lines "$uv_missing")" \
     --argjson theme "$(lines "$theme_mismatch")" \
     --argjson telemetry "$(lines "$telemetry_off")" \
+    --argjson fonts "$(lines "$font_mismatch")" \
     --arg src "$src" \
     --argjson claude "$claude_sync" \
     --argjson git "$(lines "$git_status")" \
@@ -93,6 +105,7 @@ if [ "${1:-}" = "--json" ]; then
       brew: {missing: $missing, unlisted: $unlisted},
       uv_tools_missing: $uv,
       theme_mismatch: $theme,
+      font_mismatch: $fonts,
       telemetry_on: $telemetry,
       claude_settings_in_sync: $claude,
       git: {uncommitted: $git, ahead: $ahead, behind: $behind},
@@ -102,6 +115,7 @@ if [ "${1:-}" = "--json" ]; then
         brew_unlisted: "informational only: packages you installed by hand. Do not add them to a Brewfile unless the user asks",
         uv_tools_missing: "chezmoi apply (or uv tool install <name>)",
         theme_mismatch: "copy the palette for theme.scheme from the tinty scheme yaml into .chezmoidata/theme.toml",
+        font_mismatch: "every theme.font.families cask must be in Brewfile and its name must match `ghostty +list-fonts` exactly",
         telemetry_on: "chezmoi apply (runs the opt-out commands); new tools go in .chezmoidata/telemetry.toml",
         claude_settings: "claude-sync",
         git_behind: "chezmoi update"
@@ -114,6 +128,7 @@ else
   section "Brewfiles: installed but not listed (informational)"; show "$(printf '%s' "$brew_unlisted" | tr '\n' ' ')"
   section "uv tools: listed but not installed"; show "$uv_missing"
   section "theme.toml palette vs tinty scheme"; show "$theme_mismatch"
+  section "terminal fonts (theme.toml vs Brewfile and Ghostty)"; show "$font_mismatch"
   section "telemetry (.chezmoidata/telemetry.toml)"
   if [ -n "$telemetry_off" ]; then show "$telemetry_off"; else echo "  all off"; fi
   section "Claude Code settings vs claude-settings.json"
