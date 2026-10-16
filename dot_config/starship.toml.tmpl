@@ -1,0 +1,35 @@
+add_newline = true
+
+format = """
+$directory$git_branch$git_status$bun$python$java$cmd_duration$line_break$character"""
+
+[directory]
+truncation_length = 1
+truncate_to_repo = false
+style = "bold #{{ .theme.palette.base0D }}"
+
+[git_branch]
+style = "bold #{{ .theme.palette.base0E }}"
+symbol = ""
+format = "on [$branch]($style) "
+
+[git_status]
+style = "bold #{{ .theme.palette.base08 }}"
+format = "[*]($style) "
+
+[bun]
+style = "bold #{{ .theme.palette.base0B }}"
+
+[python]
+style = "bold #{{ .theme.palette.base0D }}"
+
+[java]
+style = "bold #{{ .theme.palette.base09 }}"
+
+[cmd_duration]
+min_time = 2000
+style = "bold #{{ .theme.palette.base03 }}"
+
+[character]
+success_symbol = "[>](#{{ .theme.palette.base0B }})"
+error_symbol = "[>](#{{ .theme.palette.base08 }})"

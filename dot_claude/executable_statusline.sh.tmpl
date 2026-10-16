@@ -1,5 +1,5 @@
 #!/bin/sh
-# Claude Code statusline — matches the tinty base16-snazzy palette
+# Claude Code statusline — colors from .chezmoidata/theme.toml
 input=$(cat)
 
 model=$(echo "$input" | jq -r '.model.display_name // "?"' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
@@ -11,14 +11,19 @@ seven_d=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty
 dirname=$(basename "$dir")
 branch=$(git -C "$dir" branch --show-current 2>/dev/null)
 
-# base16-snazzy truecolor
-cyan='\033[38;2;154;237;254m'
-green='\033[38;2;90;247;142m'
-yellow='\033[38;2;243;249;157m'
-blue='\033[38;2;87;199;255m'
-magenta='\033[38;2;255;106;193m'
-red='\033[38;2;255;92;87m'
-muted='\033[38;2;120;120;126m'
+# palette from .chezmoidata/theme.toml — rgb() turns a hex color into a truecolor escape
+rgb() {
+  h=$1; rest=${h#??}
+  printf '\033[38;2;%d;%d;%dm' "0x${h%????}" "0x${rest%??}" "0x${h#????}"
+}
+{{- $p := .theme.palette }}
+cyan=$(rgb {{ $p.base0C }})
+green=$(rgb {{ $p.base0B }})
+yellow=$(rgb {{ $p.base0A }})
+blue=$(rgb {{ $p.base0D }})
+magenta=$(rgb {{ $p.base0E }})
+red=$(rgb {{ $p.base08 }})
+muted=$(rgb {{ $p.base03 }})
 reset='\033[0m'
 
 BAR_WIDTH=10

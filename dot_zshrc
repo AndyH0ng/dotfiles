@@ -8,7 +8,9 @@ else
   compinit -C
 fi
 
-export LS_COLORS="$(vivid generate snazzy)"
+# theme names come from ~/.config/zsh/theme.zsh (rendered by chezmoi)
+source ~/.config/zsh/theme.zsh
+export LS_COLORS="$(vivid generate "$VIVID_THEME")"
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 
 # ---- tinty ----

@@ -1,0 +1,7 @@
+#!/bin/sh
+# Copy ~/.claude/settings.json back into the dotfiles repo, minus the
+# machine-local autoMode block. Run after changing settings via /config.
+set -eu
+src=$(chezmoi source-path)
+jq 'del(.autoMode)' "$HOME/.claude/settings.json" > "$src/claude-settings.json"
+git -C "$src" --no-pager diff --stat -- claude-settings.json

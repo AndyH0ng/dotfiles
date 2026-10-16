@@ -1,5 +1,6 @@
 #!/bin/bash
 # Brewfile hash: {{ include "Brewfile" | sha256sum }}
+# theme: {{ .theme.scheme }}
 set -euo pipefail
 
 if ! command -v brew >/dev/null 2>&1; then
@@ -10,4 +11,4 @@ fi
 brew bundle --file="{{ .chezmoi.sourceDir }}/Brewfile"
 
 tinty install
-tinty apply base16-snazzy
+tinty apply {{ .theme.scheme | quote }}
