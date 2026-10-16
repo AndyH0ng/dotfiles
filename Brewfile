@@ -16,6 +16,8 @@ brew "bat"
 brew "ripgrep"
 brew "fd"
 brew "uv"
+brew "ruff"
+brew "ty"
 
 # terminal + fonts
 cask "ghostty"

@@ -16,3 +16,4 @@ This installs Homebrew if needed, runs `brew bundle` with the [Brewfile](Brewfil
 - **Terminal**: [Ghostty](https://ghostty.org) with a custom icon, IBM Plex Mono + D2Coding + Nerd Font symbols
 - **Theme**: base16-snazzy via [tinty](https://github.com/tinted-theming/tinty) (shell + fzf), `vivid` for `LS_COLORS`
 - **Tools**: mise, zoxide, fzf, atuin, eza, bat, ripgrep, fd, fastfetch
+- **Python**: uv, ruff, ty
