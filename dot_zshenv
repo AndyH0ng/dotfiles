@@ -4,10 +4,10 @@ typeset -U path PATH
 # uv
 export PATH="$HOME/.local/bin:$PATH"
 
-# ---- telemetry off ----
-export DO_NOT_TRACK=1                  # generic opt-out (bun, astro, turbo, …)
+# disable telemetry
+export DO_NOT_TRACK=1
 export HOMEBREW_NO_ANALYTICS=1
-export CR_CLI_TELEMETRY_DISABLED=1     # coderabbit
+export CR_CLI_TELEMETRY_DISABLED=1
 export NEXT_TELEMETRY_DISABLED=1
 export TURBO_TELEMETRY_DISABLED=1
 export ASTRO_TELEMETRY_DISABLED=1

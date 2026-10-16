@@ -9,6 +9,11 @@ fi
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 brew analytics off
+# Homebrew only loads third-party formulae that are explicitly trusted.
+# Trust just tinty, not the whole tap.
+brew tap tinted-theming/tinted
+brew trust --formula tinted-theming/tinted/tinty
+
 brew bundle --file="{{ .chezmoi.sourceDir }}/Brewfile"
 
 # telemetry settings that live in each tool's own config, not env vars
