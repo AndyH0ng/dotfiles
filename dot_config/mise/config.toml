@@ -1,3 +1,6 @@
+# Pinning policy: python is pinned exactly because venvs and uv lockfiles
+# break across minor versions; java is pinned to an LTS major; JS runtimes
+# track lts/latest on purpose.
 [tools]
 bun = "latest"
 java = "temurin-21"

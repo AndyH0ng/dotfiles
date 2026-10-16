@@ -8,13 +8,43 @@ src=$(chezmoi source-path)
 # chezmoi: target files that differ from the repo
 chezmoi_drift=$(chezmoi status --exclude scripts)
 
-# all Brewfiles combined, so "unlisted" means unlisted anywhere
-all_brewfile=$(mktemp)
-trap 'rm -f "$all_brewfile"' EXIT
+# Brewfiles this machine opted into (main + enabled optional groups)
+data=$(chezmoi data --format json)
+active="$src/Brewfile"
+for pair in dev:installDev apps:installApps fonts:installFonts; do
+  [ "$(printf '%s' "$data" | jq -r ".${pair#*:} // false")" = true ] && active="$active $src/Brewfile.${pair%%:*}"
+done
+all_brewfile=$(mktemp); active_brewfile=$(mktemp)
+trap 'rm -f "$all_brewfile" "$active_brewfile"' EXIT
 cat "$src"/Brewfile "$src"/Brewfile.* > "$all_brewfile"
-brew_missing=$(brew bundle check --file="$src/Brewfile" --no-upgrade --verbose 2>/dev/null \
+# shellcheck disable=SC2086
+cat $active > "$active_brewfile"
+
+# listed in an opted-in Brewfile but not installed
+brew_missing=$(brew bundle check --file="$active_brewfile" --no-upgrade --verbose 2>/dev/null \
   | sed -n 's/^→ [A-Za-z]* \(.*\) needs to be installed.*/\1/p')
-brew_unlisted=$(brew bundle cleanup --file="$all_brewfile" 2>/dev/null | grep -vE '^(Would|Run )')
+# installed on purpose (not as a dependency) but not listed anywhere — informational
+requested=$( { brew leaves --installed-on-request; brew list --cask -1; } 2>/dev/null)
+brew_unlisted=$(brew bundle cleanup --file="$all_brewfile" 2>/dev/null | grep -vE '^(Would|Run )' \
+  | while read -r pkg; do printf '%s\n' "$requested" | grep -qx "${pkg##*/}" && echo "$pkg"; done)
+
+# uv tools listed in uv-tools.txt but not installed
+installed_uv=$(uv tool list 2>/dev/null | awk '/^[^ -]/ {print $1}')
+uv_missing=$(grep -vE '^\s*(#|$)' "$src/uv-tools.txt" | while read -r t; do
+  printf '%s\n' "$installed_uv" | grep -qx "$t" || echo "$t"; done)
+
+# theme.toml palette must match tinty's copy of the scheme it names
+scheme=$(printf '%s' "$data" | jq -r '.theme.scheme')
+scheme_yaml="$HOME/.local/share/tinted-theming/tinty/repos/schemes/${scheme%%-*}/${scheme#*-}.yaml"
+if [ -f "$scheme_yaml" ]; then
+  theme_mismatch=$(printf '%s' "$data" | jq -r '.theme.palette | to_entries[] | "\(.key) \(.value)"' \
+    | while read -r k v; do
+        want=$(sed -n "s/^ *$k: *\"#\{0,1\}\([0-9a-fA-F]\{6\}\)\".*/\1/p" "$scheme_yaml" | tr A-F a-f)
+        [ "$want" = "$(printf '%s' "$v" | tr A-F a-f)" ] || echo "$k: theme.toml=$v $scheme=$want"
+      done)
+else
+  theme_mismatch="scheme file not found: $scheme_yaml (run tinty install)"
+fi
 
 # Claude Code settings vs the repo copy (minus machine-local autoMode)
 if jq 'del(.autoMode)' "$HOME/.claude/settings.json" | diff -q - "$src/claude-settings.json" >/dev/null; then
@@ -26,12 +56,12 @@ fi
 # git state of the repo
 git -C "$src" fetch -q 2>/dev/null
 git_status=$(git -C "$src" status --short)
-ahead=$(git -C "$src" rev-list --count @{u}..HEAD 2>/dev/null || echo 0)
-behind=$(git -C "$src" rev-list --count HEAD..@{u} 2>/dev/null || echo 0)
+ahead=$(git -C "$src" rev-list --count '@{u}..HEAD' 2>/dev/null || echo 0)
+behind=$(git -C "$src" rev-list --count 'HEAD..@{u}' 2>/dev/null || echo 0)
 
 ok=true
 # unlisted packages are informational: installed by hand, not managed
-[ -n "$chezmoi_drift$brew_missing$git_status" ] && ok=false
+[ -n "$chezmoi_drift$brew_missing$uv_missing$theme_mismatch$git_status" ] && ok=false
 [ "$claude_sync" = false ] || [ "$ahead" -gt 0 ] || [ "$behind" -gt 0 ] && ok=false
 
 lines() { printf '%s\n' "$1" | jq -R . | jq -s 'map(select(length > 0))'; }
@@ -42,18 +72,25 @@ if [ "${1:-}" = "--json" ]; then
     --argjson chezmoi "$(lines "$chezmoi_drift")" \
     --argjson missing "$(lines "$brew_missing")" \
     --argjson unlisted "$(lines "$brew_unlisted")" \
+    --argjson uv "$(lines "$uv_missing")" \
+    --argjson theme "$(lines "$theme_mismatch")" \
+    --arg src "$src" \
     --argjson claude "$claude_sync" \
     --argjson git "$(lines "$git_status")" \
     --argjson ahead "$ahead" --argjson behind "$behind" \
     '{ok: $ok,
       chezmoi_drift: $chezmoi,
       brew: {missing: $missing, unlisted: $unlisted},
+      uv_tools_missing: $uv,
+      theme_mismatch: $theme,
       claude_settings_in_sync: $claude,
       git: {uncommitted: $git, ahead: $ahead, behind: $behind},
       fixes: {
         chezmoi_drift: "chezmoi diff, then chezmoi apply (repo wins) or edit the repo",
-        brew_missing: "brew bundle --file ~/dotfiles/Brewfile",
-        brew_unlisted: "informational; add to a Brewfile.* to manage it, or brew uninstall",
+        brew_missing: ("chezmoi apply (or brew bundle --file " + $src + "/Brewfile[.group])"),
+        brew_unlisted: "informational only: packages you installed by hand. Do not add them to a Brewfile unless the user asks",
+        uv_tools_missing: "chezmoi apply (or uv tool install <name>)",
+        theme_mismatch: "copy the palette for theme.scheme from the tinty scheme yaml into .chezmoidata/theme.toml",
         claude_settings: "claude-sync",
         git_behind: "chezmoi update"
       }}'
@@ -61,8 +98,10 @@ else
   section() { printf '\n\033[1m%s\033[0m\n' "$1"; }
   show() { if [ -n "$1" ]; then printf '%s\n' "$1" | sed 's/^/  /'; else echo "  none"; fi; }
   section "chezmoi: files that differ from the repo"; show "$chezmoi_drift"
-  section "Brewfile: listed but not installed"; show "$brew_missing"
+  section "Brewfiles (opted-in): listed but not installed"; show "$brew_missing"
   section "Brewfiles: installed but not listed (informational)"; show "$(printf '%s' "$brew_unlisted" | tr '\n' ' ')"
+  section "uv tools: listed but not installed"; show "$uv_missing"
+  section "theme.toml palette vs tinty scheme"; show "$theme_mismatch"
   section "Claude Code settings vs claude-settings.json"
   [ "$claude_sync" = true ] && echo "  in sync" || echo "  out of sync — run claude-sync"
   section "git: uncommitted or unpushed"

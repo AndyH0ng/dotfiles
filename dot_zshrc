@@ -2,11 +2,11 @@
 
 # ---- completion ----
 autoload -Uz compinit
-if [[ -n ${HOME}/.zcompdump(#qN.mh+24) ]]; then
-  compinit
-else
-  compinit -C
-fi
+# full compinit (security check + rebuild) at most once a day, else use the cache.
+# The glob must be expanded in a for loop: inside [[ ]] it isn't, so the
+# test would always be true.
+for _ in ~/.zcompdump(N.mh+24); do compinit; done
+compinit -C
 
 # theme names come from ~/.config/zsh/theme.zsh (rendered by chezmoi)
 source ~/.config/zsh/theme.zsh
@@ -32,16 +32,17 @@ eval "$(zoxide init zsh)"
 source <(fzf --zsh)
 eval "$(atuin init zsh)"
 
-export PATH="$HOME/.bun/bin:$PATH"
 
 # ---- modern CLI replacements ----
-alias ls='eza --icons --group-directories-first'
+# ls shadows a POSIX tool, so it's an abbreviation (see below); ll/la/tree
+# don't shadow anything standard, so plain aliases are fine
 alias ll='eza -l --icons --group-directories-first'
 alias la='eza -la --icons --group-directories-first'
 alias tree='eza --tree --icons'
-# cat/grep/find are abbreviations, not aliases: they expand on space so
+# ls/cat/grep/find are abbreviations, not aliases: they expand on space so
 # you see what runs, and pasted commands using POSIX flags still work
 # (delete the expansion to get the original tool)
+abbr -S -q -f ls='eza --icons --group-directories-first' >/dev/null
 abbr -S -q -f cat='bat --style=plain' >/dev/null
 abbr -S -q -f grep='rg' >/dev/null
 abbr -S -q -f find='fd' >/dev/null

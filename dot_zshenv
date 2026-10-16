@@ -1,8 +1,9 @@
 # keep PATH entries unique (brew shellenv, path_helper and mise all prepend)
 typeset -U path PATH
 
-# uv
-export PATH="$HOME/.local/bin:$PATH"
+# uv tools and bun globals — here, not .zshrc, so non-interactive shells
+# (agents, scripts) see them too
+export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"
 
 # disable telemetry
 export DO_NOT_TRACK=1

@@ -26,30 +26,52 @@ jobs:
         run: brew install chezmoi
 
       - name: chezmoi init --apply
-        run: chezmoi init --apply --no-tty --promptBool "Install Brewfile.dev (IDEs/OrbStack/Chrome Canary/Figma)=false,Install Brewfile.apps (AdGuard/Notion/LaunchOS)=false,Install Brewfile.fonts (Pretendard/SF)=false" --source "$GITHUB_WORKSPACE"
-
-      - name: Tools on PATH
         run: |
-          eval "$(/opt/homebrew/bin/brew shellenv)"
-          export PATH="$HOME/.local/bin:$PATH"   # uv tools
-          test -f "$(brew --prefix)/opt/antidote/share/antidote/antidote.zsh"  # antidote is a sourced zsh function, not a binary
-          for t in starship vivid tinty mise zoxide fzf atuin eza bat rg fd uv ruff pyrefly jq xh gitleaks delta; do
-            command -v "$t" >/dev/null || { echo "missing: $t"; exit 1; }
-          done
+          # Answer the optional-group prompts by data key (promptBoolOnce reads
+          # existing config data), so CI doesn't depend on the prompt wording.
+          mkdir -p ~/.config/chezmoi
+          printf '[data]\ninstallDev = false\ninstallApps = false\ninstallFonts = false\n' > ~/.config/chezmoi/chezmoi.toml
+          chezmoi init --apply --no-tty --source "$GITHUB_WORKSPACE"
 
       - name: Interactive zsh starts cleanly
         run: |
-          out=$(zsh -i -c 'echo VIVID=$VIVID_THEME; echo LS_COLORS=${#LS_COLORS}; abbr list | grep -q "^.cat.=" && echo abbr-ok' 2>&1)
+          out=$(zsh -i -c 'echo VIVID=$VIVID_THEME; echo LS_COLORS=${#LS_COLORS}; abbr list | grep -q "^.ls.=" && echo abbr-ok' 2>&1)
           echo "$out"
           if echo "$out" | grep -qiE 'command not found|no such file|parse error'; then exit 1; fi
           echo "$out" | grep -q '^VIVID=.\+' || exit 1
           echo "$out" | grep -q '^abbr-ok' || exit 1
 
-      - name: dotfiles-doctor --json is valid
+      - name: dotfiles-doctor reports no drift
+        # covers every opted-in Brewfile, uv-tools.txt, theme palette vs tinty,
+        # rendered files and Claude settings — no hand-copied tool list here
+        run: |
+          eval "$(brew shellenv 2>/dev/null || /opt/homebrew/bin/brew shellenv)"
+          export PATH="$HOME/.local/bin:$PATH"
+          dotfiles-doctor --json | tee "$RUNNER_TEMP/doctor.json" || true
+          jq -e '.chezmoi_drift == [] and .brew.missing == [] and .uv_tools_missing == []
+                 and .theme_mismatch == [] and .claude_settings_in_sync' "$RUNNER_TEMP/doctor.json"
+
+      - name: Optional Brewfiles reference real packages
+        # optional groups are off above, so at least check every name resolves
         run: |
           eval "$(/opt/homebrew/bin/brew shellenv)"
-          ~/.local/bin/dotfiles-doctor --json | tee doctor.json || true
-          jq -e '.chezmoi_drift == [] and .brew.missing == [] and .claude_settings_in_sync' doctor.json
+          for f in Brewfile.*; do
+            echo "== $f"
+            formulae=$(brew bundle list --file "$f" --formula)
+            casks=$(brew bundle list --file "$f" --cask)
+            [ -z "$formulae" ] || brew info --json=v2 --formula $formulae >/dev/null
+            [ -z "$casks" ] || brew info --json=v2 --cask $casks >/dev/null
+          done
+
+      - name: shellcheck (rendered)
+        run: |
+          eval "$(/opt/homebrew/bin/brew shellenv)"
+          brew install shellcheck
+          for f in run_onchange_*.tmpl dot_claude/*.tmpl dot_local/bin/executable_* .githooks/pre-commit; do
+            shell=sh; head -1 "$f" | grep -q bash && shell=bash
+            echo "== $f ($shell)"
+            chezmoi execute-template --source "$GITHUB_WORKSPACE" < "$f" | shellcheck -s "$shell" -
+          done
 
       - name: Secret scan (gitleaks from the Brewfile)
         run: |

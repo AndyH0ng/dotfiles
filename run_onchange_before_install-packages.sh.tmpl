@@ -29,8 +29,10 @@ brew bundle --no-upgrade --file="{{ .chezmoi.sourceDir }}/Brewfile.apps"
 brew bundle --no-upgrade --file="{{ .chezmoi.sourceDir }}/Brewfile.fonts"
 {{- end }}
 
-# Python CLIs that aren't in Homebrew
-uv tool install pyrefly   # type checker (Meta, Rust)
+# Python CLIs that aren't in Homebrew (uv-tools.txt hash: {{ include "uv-tools.txt" | sha256sum }})
+grep -vE '^\s*(#|$)' "{{ .chezmoi.sourceDir }}/uv-tools.txt" | while read -r tool; do
+  uv tool install "$tool"
+done
 
 # telemetry settings that live in each tool's own config, not env vars
 gh config set telemetry disabled
