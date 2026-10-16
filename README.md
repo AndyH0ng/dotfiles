@@ -8,7 +8,7 @@ macOS terminal setup, managed with [chezmoi](https://chezmoi.io).
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply AndyH0ng
 ```
 
-This installs Homebrew if needed, runs `brew bundle` with the [Brewfile](Brewfile), and applies the tinty theme. `chezmoi init` asks once whether to also install [Brewfile.extra](Brewfile.extra) (personal apps, fonts, extra CLIs).
+This installs Homebrew if needed, runs `brew bundle` with the [Brewfile](Brewfile), and applies the tinty theme. `chezmoi init` asks once per optional group: [Brewfile.dev](Brewfile.dev) (IDEs, OrbStack, Chrome Canary, Figma), [Brewfile.apps](Brewfile.apps) (AdGuard, Notion, LaunchOS) and [Brewfile.fonts](Brewfile.fonts) (Pretendard, SF).
 
 ## What's inside
 

@@ -1,5 +1,5 @@
-# Everything the dotfiles in this repo depend on. Personal apps and
-# extra CLIs live in Brewfile.extra (installed only if you opt in).
+# Everything the dotfiles in this repo depend on. Optional groups live in
+# Brewfile.dev / Brewfile.apps / Brewfile.fonts (each opt-in on chezmoi init).
 
 tap "tinted-theming/tinted"
 

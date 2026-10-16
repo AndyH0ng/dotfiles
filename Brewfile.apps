@@ -1,0 +1,4 @@
+# Everyday apps (opt-in: installApps)
+cask "adguard"
+cask "notion"
+cask "launchos"

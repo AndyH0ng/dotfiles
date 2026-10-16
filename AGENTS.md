@@ -9,9 +9,9 @@ Guide for AI agents (and humans) changing this dotfiles repo. It is managed with
 | `dot_*`, `dot_config/…` | Files that land in `$HOME` (`dot_zshrc` → `~/.zshrc`) |
 | `*.tmpl` | Templates, rendered by chezmoi |
 | `.chezmoidata/theme.toml` | **Only** place colors and theme names are defined |
-| `.chezmoi.toml.tmpl` | chezmoi config: symlink mode, `installExtras` prompt |
+| `.chezmoi.toml.tmpl` | chezmoi config: symlink mode, `installDev`/`installApps`/`installFonts` prompts |
 | `Brewfile` | Everything the dotfiles depend on |
-| `Brewfile.extra` | Personal apps, fonts and extra CLIs (opt-in via `installExtras`) |
+| `Brewfile.dev` / `.apps` / `.fonts` | Optional groups, each opt-in (`installDev`, `installApps`, `installFonts`). Keep them to essentials only. |
 | `run_onchange_before_install-packages.sh.tmpl` | brew bundle, tap trust, gh/codex telemetry, git hooks path |
 | `run_onchange_after_setup.sh.tmpl` | `mise install`, tinty theme |
 | `claude-settings.json` | Source for `~/.claude/settings.json` (see below) |
@@ -30,7 +30,8 @@ Guide for AI agents (and humans) changing this dotfiles repo. It is managed with
 ## Adding things
 
 - **A config file:** `chezmoi add <path>`. Then check the source name has no `private_` or `executable_` prefix it doesn't need, because those attributes make chezmoi **copy** instead of symlink. `chmod 644` the target if needed.
-- **A package:** add it to `Brewfile` if a dotfile depends on it, otherwise to `Brewfile.extra`.
+- **A package:** add it to `Brewfile` if a dotfile depends on it, otherwise to the matching optional `Brewfile.*` — only if it's genuinely essential. Packages installed by hand and not listed anywhere are fine; `dotfiles-doctor` lists them as informational.
+  - A new optional group needs: the file, a `promptBoolOnce` in `.chezmoi.toml.tmpl`, a hash line + `if` block in the install script, an entry in `.chezmoiignore`, and its prompt text in the CI `--promptBool` (chezmoi matches `--promptBool` by **prompt text**, not data key, and splits on commas — so prompt text must not contain commas).
   - Formulae from third-party taps need an explicit `brew trust --formula|--cask <full/name>` line in the install script (Homebrew 7 refuses untrusted taps). Trust the single formula, not the whole tap.
   - The install script uses `brew bundle --no-upgrade`. Without it, every Brewfile change also upgrades every outdated package (minutes of big cask downloads). Upgrades are a separate, deliberate `brew upgrade`.
   - Some formulae aren't binaries (e.g. `antidote` is a sourced zsh script). Don't check them with `command -v`.
@@ -42,7 +43,7 @@ Guide for AI agents (and humans) changing this dotfiles repo. It is managed with
 1. `chezmoi apply` (or `chezmoi diff` for a dry run).
 2. Run `dotfiles-doctor --json` and expect `"ok": true` once committed and pushed. Each failing field has a hint in `fixes`.
 3. Commit. The pre-commit hook runs gitleaks, and you shouldn't bypass it.
-4. Push, then `gh run watch` the CI run. CI installs from scratch on macOS with `installExtras=false`. A red CI means a new Mac would break.
+4. Push, then `gh run watch` the CI run. CI installs from scratch on macOS with every optional group off. A red CI means a new Mac would break.
 
 ## Don'ts
 

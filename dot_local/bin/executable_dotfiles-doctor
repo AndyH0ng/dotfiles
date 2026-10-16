@@ -8,10 +8,10 @@ src=$(chezmoi source-path)
 # chezmoi: target files that differ from the repo
 chezmoi_drift=$(chezmoi status --exclude scripts)
 
-# Brewfile + Brewfile.extra combined, so "unlisted" means unlisted anywhere
+# all Brewfiles combined, so "unlisted" means unlisted anywhere
 all_brewfile=$(mktemp)
 trap 'rm -f "$all_brewfile"' EXIT
-cat "$src/Brewfile" "$src/Brewfile.extra" > "$all_brewfile"
+cat "$src"/Brewfile "$src"/Brewfile.* > "$all_brewfile"
 brew_missing=$(brew bundle check --file="$src/Brewfile" --no-upgrade --verbose 2>/dev/null \
   | sed -n 's/^→ [A-Za-z]* \(.*\) needs to be installed.*/\1/p')
 brew_unlisted=$(brew bundle cleanup --file="$all_brewfile" 2>/dev/null | grep -vE '^(Would|Run )')
@@ -30,7 +30,8 @@ ahead=$(git -C "$src" rev-list --count @{u}..HEAD 2>/dev/null || echo 0)
 behind=$(git -C "$src" rev-list --count HEAD..@{u} 2>/dev/null || echo 0)
 
 ok=true
-[ -n "$chezmoi_drift$brew_missing$brew_unlisted$git_status" ] && ok=false
+# unlisted packages are informational: installed by hand, not managed
+[ -n "$chezmoi_drift$brew_missing$git_status" ] && ok=false
 [ "$claude_sync" = false ] || [ "$ahead" -gt 0 ] || [ "$behind" -gt 0 ] && ok=false
 
 lines() { printf '%s\n' "$1" | jq -R . | jq -s 'map(select(length > 0))'; }
@@ -52,7 +53,7 @@ if [ "${1:-}" = "--json" ]; then
       fixes: {
         chezmoi_drift: "chezmoi diff, then chezmoi apply (repo wins) or edit the repo",
         brew_missing: "brew bundle --file ~/dotfiles/Brewfile",
-        brew_unlisted: "add to Brewfile / Brewfile.extra, or brew uninstall",
+        brew_unlisted: "informational; add to a Brewfile.* to manage it, or brew uninstall",
         claude_settings: "claude-sync",
         git_behind: "chezmoi update"
       }}'
@@ -61,7 +62,7 @@ else
   show() { if [ -n "$1" ]; then printf '%s\n' "$1" | sed 's/^/  /'; else echo "  none"; fi; }
   section "chezmoi: files that differ from the repo"; show "$chezmoi_drift"
   section "Brewfile: listed but not installed"; show "$brew_missing"
-  section "Brewfiles: installed but not listed"; show "$(printf '%s' "$brew_unlisted" | tr '\n' ' ')"
+  section "Brewfiles: installed but not listed (informational)"; show "$(printf '%s' "$brew_unlisted" | tr '\n' ' ')"
   section "Claude Code settings vs claude-settings.json"
   [ "$claude_sync" = true ] && echo "  in sync" || echo "  out of sync — run claude-sync"
   section "git: uncommitted or unpushed"

@@ -1,7 +1,10 @@
 #!/bin/bash
 # Runs before files are written, so tools like jq exist for modify_ scripts.
 # Brewfile hash: {{ include "Brewfile" | sha256sum }}
-# Brewfile.extra hash: {{ include "Brewfile.extra" | sha256sum }} (installExtras={{ .installExtras }})
+{{- range $f := list "dev" "apps" "fonts" }}
+# Brewfile.{{ $f }} hash: {{ include (print "Brewfile." $f) | sha256sum }}
+{{- end }}
+# opt-ins: dev={{ .installDev }} apps={{ .installApps }} fonts={{ .installFonts }}
 set -euo pipefail
 
 if ! command -v brew >/dev/null 2>&1; then
@@ -16,18 +19,23 @@ brew tap tinted-theming/tinted
 brew trust --formula tinted-theming/tinted/tinty
 
 brew bundle --no-upgrade --file="{{ .chezmoi.sourceDir }}/Brewfile"
-{{- if .installExtras }}
-
-brew tap openemu-silicon/openemu-silicon https://github.com/OpenEmu-Silicon/OpenEmu-Silicon
-brew trust --cask openemu-silicon/openemu-silicon/openemu-silicon
-brew bundle --no-upgrade --file="{{ .chezmoi.sourceDir }}/Brewfile.extra"
+{{- if .installDev }}
+brew bundle --no-upgrade --file="{{ .chezmoi.sourceDir }}/Brewfile.dev"
+{{- end }}
+{{- if .installApps }}
+brew bundle --no-upgrade --file="{{ .chezmoi.sourceDir }}/Brewfile.apps"
+{{- end }}
+{{- if .installFonts }}
+brew bundle --no-upgrade --file="{{ .chezmoi.sourceDir }}/Brewfile.fonts"
 {{- end }}
 
 # telemetry settings that live in each tool's own config, not env vars
 gh config set telemetry disabled
-mkdir -p "$HOME/.codex" && touch "$HOME/.codex/config.toml"
-grep -q '^\[analytics\]' "$HOME/.codex/config.toml" \
-  || printf '\n[analytics]\nenabled = false\n' >> "$HOME/.codex/config.toml"
+if command -v codex >/dev/null 2>&1; then
+  mkdir -p "$HOME/.codex" && touch "$HOME/.codex/config.toml"
+  grep -q '^\[analytics\]' "$HOME/.codex/config.toml" \
+    || printf '\n[analytics]\nenabled = false\n' >> "$HOME/.codex/config.toml"
+fi
 
 # block commits that contain secrets (this repo is public)
 git -C "{{ .chezmoi.sourceDir }}" config core.hooksPath .githooks
