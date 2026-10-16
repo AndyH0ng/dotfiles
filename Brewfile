@@ -18,9 +18,11 @@ brew "fd"
 brew "uv"
 brew "ruff"
 brew "ty"
+brew "jq"
 
 # terminal + fonts
 cask "ghostty"
+cask "claude-code@latest"
 cask "font-ibm-plex-mono"
 cask "font-d2coding"
 cask "font-symbols-only-nerd-font"

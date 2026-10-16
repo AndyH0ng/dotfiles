@@ -17,3 +17,8 @@ This installs Homebrew if needed, runs `brew bundle` with the [Brewfile](Brewfil
 - **Theme**: base16-snazzy via [tinty](https://github.com/tinted-theming/tinty) (shell + fzf), `vivid` for `LS_COLORS`
 - **Tools**: mise, zoxide, fzf, atuin, eza, bat, ripgrep, fd, fastfetch
 - **Python**: uv, ruff, ty
+- **Claude Code**: `settings.json` (plugins, theme, statusline) and a base16-snazzy [statusline](dot_claude/executable_statusline.sh)
+
+### Claude Code settings
+
+`~/.claude/settings.json` is generated from [`claude-settings.json`](claude-settings.json) by a chezmoi `modify_` script that keeps each machine's local `autoMode` block out of git. Edit `claude-settings.json` and run `chezmoi apply` (`chezmoi re-add` doesn't apply to this file).

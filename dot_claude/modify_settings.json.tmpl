@@ -1,0 +1,10 @@
+#!/bin/sh
+# Writes claude-settings.json from the repo, keeping the local machine's
+# autoMode block (it holds private repo names and paths, so it stays out of git).
+set -eu
+current=$(mktemp)
+trap 'rm -f "$current"' EXIT
+cat > "$current"
+[ -s "$current" ] || echo '{}' > "$current"
+jq -s '.[0] + (if .[1].autoMode then {autoMode: .[1].autoMode} else {} end)' \
+  "{{ .chezmoi.sourceDir }}/claude-settings.json" "$current"
