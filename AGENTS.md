@@ -13,7 +13,7 @@ Guide for AI agents (and humans) changing this dotfiles repo. It is managed with
 | `Brewfile` | Everything the dotfiles depend on |
 | `Brewfile.dev` / `.apps` / `.fonts` | Optional groups, each opt-in (`installDev`, `installApps`, `installFonts`). Keep them to essentials only. |
 | `run_onchange_before_install-packages.sh.tmpl` | brew bundle, tap trust, gh/codex telemetry, git hooks path |
-| `run_onchange_after_setup.sh.tmpl` | `mise install`, tinty theme |
+| `run_onchange_after_setup.sh.tmpl` | `mise install`, tinty theme, Claude Code MCP servers (`claude mcp add`) |
 | `claude-settings.json` | Source for `~/.claude/settings.json` (see below) |
 | `dot_local/bin/` | `claude-sync`, `dotfiles-doctor` |
 | `.githooks/pre-commit` | gitleaks on staged changes |

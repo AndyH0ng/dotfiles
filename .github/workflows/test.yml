@@ -64,6 +64,7 @@ jobs:
           echo '{"model":{"display_name":"x"},"workspace":{"current_dir":"/tmp"}}' | ~/.claude/statusline.sh
           jq -e '.statusLine' ~/.claude/settings.json >/dev/null
           test -L ~/.gitconfig
+          jq -e '.mcpServers["chrome-devtools"].args | index("--autoConnect")' ~/.claude.json >/dev/null
           test "$(git config --global --get merge.conflictStyle)" = zdiff3
           # no signing key on the runner, so signing must stay off
           test -z "$(git config --global --includes --get commit.gpgSign)"

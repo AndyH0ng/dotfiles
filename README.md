@@ -18,7 +18,7 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply AndyH0ng
 - **도구**: mise(언어 런타임), zoxide, fzf, atuin(인라인, 10줄), eza, bat, ripgrep, fd, xh, fastfetch
 - **Python**: uv, ruff, [pyrefly](https://pyrefly.org)(타입 체커)
 - **Git**: 최신 기본값(histogram diff, zdiff3, rerere, autoSetupRemote), pager로 [delta](https://github.com/dandavison/delta) 사용(lazygit 포함), 서명 키가 있을 때만 SSH 커밋 서명
-- **Claude Code**: `settings.json`(플러그인, 테마, 상태바)과 base16-snazzy [상태바](dot_claude/executable_statusline.sh.tmpl)
+- **Claude Code**: `settings.json`(플러그인, 테마, 상태바)과 base16-snazzy [상태바](dot_claude/executable_statusline.sh.tmpl), 실행 중인 Chrome Canary에 붙는 chrome-devtools MCP(`chrome://inspect/#remote-debugging`에서 원격 디버깅을 켜야 함)
 - **프라이버시**: Homebrew, gh, Claude Code, Codex, CodeRabbit, 주요 JS 도구의 텔레메트리 끔(`.zshenv`의 `DO_NOT_TRACK` 등)
 
 ## 수정하기
