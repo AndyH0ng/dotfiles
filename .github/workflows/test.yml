@@ -26,12 +26,8 @@ jobs:
         run: brew install chezmoi
 
       - name: chezmoi init --apply
-        run: |
-          # Answer the optional-group prompts by data key (promptBoolOnce reads
-          # existing config data), so CI doesn't depend on the prompt wording.
-          mkdir -p ~/.config/chezmoi
-          printf '[data]\ninstallDev = false\ninstallApps = false\ninstallFonts = false\n' > ~/.config/chezmoi/chezmoi.toml
-          chezmoi init --apply --no-tty --source "$GITHUB_WORKSPACE"
+        # --promptDefaults: every optional group takes its default (off)
+        run: chezmoi init --apply --no-tty --promptDefaults --source "$GITHUB_WORKSPACE"
 
       - name: Interactive zsh starts cleanly
         run: |

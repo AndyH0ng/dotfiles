@@ -1,10 +1,10 @@
 #!/bin/bash
 # Runs before files are written, so tools like jq exist for modify_ scripts.
 # Brewfile hash: {{ include "Brewfile" | sha256sum }}
-{{- range $f := list "dev" "apps" "fonts" }}
-# Brewfile.{{ $f }} hash: {{ include (print "Brewfile." $f) | sha256sum }}
+{{- range .groups }}
+# Brewfile.{{ .name }} hash: {{ include (print "Brewfile." .name) | sha256sum }}
 {{- end }}
-# opt-ins: dev={{ .installDev }} apps={{ .installApps }} fonts={{ .installFonts }}
+# opt-ins: {{ .install | toJson }}
 set -euo pipefail
 
 if ! command -v brew >/dev/null 2>&1; then
@@ -19,14 +19,10 @@ brew tap tinted-theming/tinted
 brew trust --formula tinted-theming/tinted/tinty
 
 brew bundle --no-upgrade --file="{{ .chezmoi.sourceDir }}/Brewfile"
-{{- if .installDev }}
-brew bundle --no-upgrade --file="{{ .chezmoi.sourceDir }}/Brewfile.dev"
-{{- end }}
-{{- if .installApps }}
-brew bundle --no-upgrade --file="{{ .chezmoi.sourceDir }}/Brewfile.apps"
-{{- end }}
-{{- if .installFonts }}
-brew bundle --no-upgrade --file="{{ .chezmoi.sourceDir }}/Brewfile.fonts"
+{{- range .groups }}
+{{-   if index $.install .name }}
+brew bundle --no-upgrade --file="{{ $.chezmoi.sourceDir }}/Brewfile.{{ .name }}"
+{{-   end }}
 {{- end }}
 
 # Python CLIs that aren't in Homebrew (uv-tools.txt hash: {{ include "uv-tools.txt" | sha256sum }})

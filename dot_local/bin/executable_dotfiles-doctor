@@ -11,8 +11,8 @@ chezmoi_drift=$(chezmoi status --exclude scripts)
 # Brewfiles this machine opted into (main + enabled optional groups)
 data=$(chezmoi data --format json)
 active="$src/Brewfile"
-for pair in dev:installDev apps:installApps fonts:installFonts; do
-  [ "$(printf '%s' "$data" | jq -r ".${pair#*:} // false")" = true ] && active="$active $src/Brewfile.${pair%%:*}"
+for g in $(printf '%s' "$data" | jq -r '.groups[].name'); do
+  [ "$(printf '%s' "$data" | jq -r --arg g "$g" '.install[$g] // false')" = true ] && active="$active $src/Brewfile.$g"
 done
 all_brewfile=$(mktemp); active_brewfile=$(mktemp)
 trap 'rm -f "$all_brewfile" "$active_brewfile"' EXIT

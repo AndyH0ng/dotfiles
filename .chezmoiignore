@@ -1,9 +1,6 @@
 README.md
+Brewfile*
 AGENTS.md
 CLAUDE.md
-Brewfile
-Brewfile.dev
-Brewfile.apps
-Brewfile.fonts
 claude-settings.json
 uv-tools.txt

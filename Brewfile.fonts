@@ -1,4 +1,4 @@
-# UI fonts (opt-in: installFonts). Terminal fonts are in the main Brewfile.
+# UI fonts (opt-in group "fonts", see .chezmoidata/packages.toml). Terminal fonts are in the main Brewfile.
 cask "font-pretendard"
 cask "font-sf-pro"
 cask "font-sf-mono"

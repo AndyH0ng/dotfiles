@@ -1,0 +1,16 @@
+# Optional Brewfile groups — the single source for them. Each entry needs a
+# matching Brewfile.<name>. Everything else (the init prompt, the install
+# script, dotfiles-doctor, CI) loops over this list.
+# Descriptions must not contain commas (they become prompt text).
+
+[[groups]]
+name = "dev"
+description = "IDEs/OrbStack/Chrome Canary/Figma"
+
+[[groups]]
+name = "apps"
+description = "AdGuard/Notion/LaunchOS"
+
+[[groups]]
+name = "fonts"
+description = "Pretendard/SF"

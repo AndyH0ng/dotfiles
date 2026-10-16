@@ -1,13 +1,16 @@
 # Non-template files in $HOME are symlinks into the repo, so editing
 # ~/.zshrc edits the repo directly — no `chezmoi re-add` needed.
 # Templates (theme-driven files) are still rendered copies.
-{{- $installDev := promptBoolOnce . "installDev" "Install Brewfile.dev (IDEs/OrbStack/Chrome Canary/Figma)" false }}
-{{- $installApps := promptBoolOnce . "installApps" "Install Brewfile.apps (AdGuard/Notion/LaunchOS)" false }}
-{{- $installFonts := promptBoolOnce . "installFonts" "Install Brewfile.fonts (Pretendard/SF)" false }}
+{{- /* .chezmoidata isn't loaded yet at init, so read the group list directly */}}
+{{- $groups := (include ".chezmoidata/packages.toml" | fromToml).groups }}
+{{- $install := dict }}
+{{- range $groups }}
+{{-   $_ := set $install .name (promptBoolOnce $ (list "install" .name) (printf "Install Brewfile.%s (%s)" .name .description) false) }}
+{{- end }}
 sourceDir = {{ .chezmoi.sourceDir | quote }}
 mode = "symlink"
 
-[data]
-installDev = {{ $installDev }}
-installApps = {{ $installApps }}
-installFonts = {{ $installFonts }}
+[data.install]
+{{- range $name, $on := $install }}
+{{ $name }} = {{ $on }}
+{{- end }}

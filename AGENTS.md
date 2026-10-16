@@ -13,9 +13,10 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 | `dot_*`, `dot_config/…` | Files that land in `$HOME` (`dot_zshrc` → `~/.zshrc`) |
 | `*.tmpl` | Templates, rendered by chezmoi |
 | `.chezmoidata/theme.toml` | **Only** place colors and theme names are defined |
-| `.chezmoi.toml.tmpl` | chezmoi config: symlink mode, `installDev`/`installApps`/`installFonts` prompts |
+| `.chezmoi.toml.tmpl` | chezmoi config: symlink mode, one prompt per optional group |
+| `.chezmoidata/packages.toml` | **Only** place optional Brewfile groups are defined |
 | `Brewfile` | Everything the dotfiles depend on |
-| `Brewfile.dev` / `.apps` / `.fonts` | Optional groups, each opt-in (`installDev`, `installApps`, `installFonts`). Keep them to essentials only. |
+| `Brewfile.<group>` | One file per optional group (opt-in, stored as `.install.<group>`). Keep them to essentials only. |
 | `uv-tools.txt` | Python CLIs installed with `uv tool install` (e.g. pyrefly) |
 | `run_onchange_before_install-packages.sh.tmpl` | brew bundle, tap trust, uv tools, gh/codex telemetry, git hooks path |
 | `run_onchange_after_setup.sh.tmpl` | `mise install`, tinty theme, Claude Code MCP servers (`claude mcp add`) |
@@ -37,7 +38,9 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 
 - **A config file:** `chezmoi add <path>`. Then check the source name has no `private_` or `executable_` prefix it doesn't need, because those attributes make chezmoi **copy** instead of symlink. `chmod 644` the target if needed.
 - **A package:** add it to `Brewfile` if a dotfile depends on it, otherwise to the matching optional `Brewfile.*` — only if it's genuinely essential. Packages installed by hand and not listed anywhere are fine; `dotfiles-doctor` lists them as informational.
-  - A new optional group needs: the file, a `promptBoolOnce` in `.chezmoi.toml.tmpl`, a hash line + `if` block in the install script, an entry in `.chezmoiignore`, the `group:installKey` pair in `dotfiles-doctor`, and a `false` line in the CI config seed. CI answers prompts by **data key** via a pre-written `chezmoi.toml`. Don't use `--promptBool`: it matches by prompt text and splits on commas.
+  - A new optional group needs two things: a `[[groups]]` entry in `.chezmoidata/packages.toml` and a `Brewfile.<name>`. Nothing else, because the prompt, install script, doctor and CI all loop over that list. Then run `chezmoi init` to answer the new prompt. Descriptions must not contain commas.
+  - `.chezmoi.toml.tmpl` can't see `.chezmoidata` (it isn't loaded at init yet), so it reads `packages.toml` with `include … | fromToml`.
+  - CI uses `chezmoi init --promptDefaults` (every group off). Don't use `--promptBool`: it matches by prompt text and splits on commas.
   - Formulae from third-party taps need an explicit `brew trust --formula|--cask <full/name>` line in the install script (Homebrew 7 refuses untrusted taps). Trust the single formula, not the whole tap.
   - The install script uses `brew bundle --no-upgrade`. Without it, every Brewfile change also upgrades every outdated package (minutes of big cask downloads). Upgrades are a separate, deliberate `brew upgrade`.
   - Python CLIs not in Homebrew go in `uv-tools.txt`. The install script installs them and `dotfiles-doctor` checks them.
