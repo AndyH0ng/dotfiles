@@ -37,9 +37,5 @@
   "tui": "fullscreen",
   "theme": "dark-daltonized",
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true,
-  "env": {
-    "DISABLE_TELEMETRY": "1",
-    "DISABLE_ERROR_REPORTING": "1"
-  }
+  "agentPushNotifEnabled": true
 }

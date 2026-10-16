@@ -46,12 +46,21 @@ else
   theme_mismatch="scheme file not found: $scheme_yaml (run tinty install)"
 fi
 
-# Claude Code settings vs the repo copy (minus machine-local autoMode)
-if jq 'del(.autoMode)' "$HOME/.claude/settings.json" | diff -q - "$src/claude-settings.json" >/dev/null; then
-  claude_sync=true
-else
-  claude_sync=false
-fi
+# Claude Code settings vs the repo copy (same stripping rules as claude-sync)
+if "$HOME/.local/bin/claude-sync" --check; then claude_sync=true; else claude_sync=false; fi
+
+# telemetry: env vars visible in a non-interactive shell (what agents get),
+# and per-tool opt-outs actually off (.chezmoidata/telemetry.toml)
+telemetry_off=$(printf '%s' "$data" | jq -r '.telemetry.env | to_entries[] | "\(.key)=\(.value)"' \
+  | while IFS='=' read -r k v; do
+      [ "$(zsh -c "printenv $k")" = "$v" ] || echo "env $k not set to $v in non-interactive zsh"
+    done)
+telemetry_off="$telemetry_off$(printf '%s' "$data" | jq -c '.telemetry.commands[]' | while read -r c; do
+  tool=$(printf '%s' "$c" | jq -r .tool)
+  command -v "$tool" >/dev/null 2>&1 || continue
+  sh -c "$(printf '%s' "$c" | jq -r .check)" >/dev/null 2>&1 || printf '\n%s telemetry is on' "$tool"
+done)"
+telemetry_off=$(printf '%s' "$telemetry_off" | sed '/^$/d')
 
 # git state of the repo
 git -C "$src" fetch -q 2>/dev/null
@@ -61,7 +70,7 @@ behind=$(git -C "$src" rev-list --count 'HEAD..@{u}' 2>/dev/null || echo 0)
 
 ok=true
 # unlisted packages are informational: installed by hand, not managed
-[ -n "$chezmoi_drift$brew_missing$uv_missing$theme_mismatch$git_status" ] && ok=false
+[ -n "$chezmoi_drift$brew_missing$uv_missing$theme_mismatch$telemetry_off$git_status" ] && ok=false
 [ "$claude_sync" = false ] || [ "$ahead" -gt 0 ] || [ "$behind" -gt 0 ] && ok=false
 
 lines() { printf '%s\n' "$1" | jq -R . | jq -s 'map(select(length > 0))'; }
@@ -74,6 +83,7 @@ if [ "${1:-}" = "--json" ]; then
     --argjson unlisted "$(lines "$brew_unlisted")" \
     --argjson uv "$(lines "$uv_missing")" \
     --argjson theme "$(lines "$theme_mismatch")" \
+    --argjson telemetry "$(lines "$telemetry_off")" \
     --arg src "$src" \
     --argjson claude "$claude_sync" \
     --argjson git "$(lines "$git_status")" \
@@ -83,6 +93,7 @@ if [ "${1:-}" = "--json" ]; then
       brew: {missing: $missing, unlisted: $unlisted},
       uv_tools_missing: $uv,
       theme_mismatch: $theme,
+      telemetry_on: $telemetry,
       claude_settings_in_sync: $claude,
       git: {uncommitted: $git, ahead: $ahead, behind: $behind},
       fixes: {
@@ -91,6 +102,7 @@ if [ "${1:-}" = "--json" ]; then
         brew_unlisted: "informational only: packages you installed by hand. Do not add them to a Brewfile unless the user asks",
         uv_tools_missing: "chezmoi apply (or uv tool install <name>)",
         theme_mismatch: "copy the palette for theme.scheme from the tinty scheme yaml into .chezmoidata/theme.toml",
+        telemetry_on: "chezmoi apply (runs the opt-out commands); new tools go in .chezmoidata/telemetry.toml",
         claude_settings: "claude-sync",
         git_behind: "chezmoi update"
       }}'
@@ -102,6 +114,8 @@ else
   section "Brewfiles: installed but not listed (informational)"; show "$(printf '%s' "$brew_unlisted" | tr '\n' ' ')"
   section "uv tools: listed but not installed"; show "$uv_missing"
   section "theme.toml palette vs tinty scheme"; show "$theme_mismatch"
+  section "telemetry (.chezmoidata/telemetry.toml)"
+  if [ -n "$telemetry_off" ]; then show "$telemetry_off"; else echo "  all off"; fi
   section "Claude Code settings vs claude-settings.json"
   [ "$claude_sync" = true ] && echo "  in sync" || echo "  out of sync — run claude-sync"
   section "git: uncommitted or unpushed"

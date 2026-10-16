@@ -1,0 +1,4 @@
+# generated from .chezmoidata/telemetry.toml — edit that, not this
+{{- range $k, $v := .telemetry.env }}
+export {{ $k }}={{ $v | quote }}
+{{- end }}

@@ -15,6 +15,7 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 | `.chezmoidata/theme.toml` | **Only** place colors and theme names are defined |
 | `.chezmoi.toml.tmpl` | chezmoi config: symlink mode, one prompt per optional group |
 | `.chezmoidata/packages.toml` | **Only** place optional Brewfile groups are defined |
+| `.chezmoidata/telemetry.toml` | **Only** place telemetry opt-outs are defined (env vars, Claude env, per-tool commands + checks) |
 | `Brewfile` | Everything the dotfiles depend on |
 | `Brewfile.<group>` | One file per optional group (opt-in, stored as `.install.<group>`). Keep them to essentials only. |
 | `uv-tools.txt` | Python CLIs installed with `uv tool install` (e.g. pyrefly) |
@@ -31,7 +32,7 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 - **Templates are copies.** Edit the `.tmpl` in the repo, then run `chezmoi apply`. Never edit the rendered file in `$HOME`, because the next apply overwrites it.
 - **`executable_` files are copies too**, not symlinks: `~/.local/bin/dotfiles-doctor`, `~/.local/bin/claude-sync`, `~/.claude/statusline.sh`. Edit them in `dot_local/bin/` / `dot_claude/` and run `chezmoi apply`.
 - **Colors.** Never hardcode a hex color or theme name. Add a key to `.chezmoidata/theme.toml` and reference it as `{{ .theme.palette.base0D }}` from a `.tmpl`. Shell-side consumers read `~/.config/zsh/theme.zsh`. Tools that accept ANSI color names (delta's `base16` theme, zsh-patina) should use those so they follow the palette automatically. When changing `theme.scheme`, copy the palette from tinty's scheme yaml, and `dotfiles-doctor` flags any mismatch.
-- **Claude Code settings.** `dot_claude/modify_settings.json.tmpl` merges `claude-settings.json` with the machine's local `autoMode` block, which holds private repo names and never goes in git. After changing settings via `/config`, run `claude-sync`.
+- **Claude Code settings.** `dot_claude/modify_settings.json.tmpl` builds `~/.claude/settings.json` from `claude-settings.json`, adds `telemetry.claude_env`, and keeps the machine's local `autoMode` block, which holds private repo names and never goes in git. `claude-sync` does the reverse and strips both. After changing settings via `/config`, run `claude-sync`. Never add telemetry keys to `claude-settings.json` directly.
 - **Machine-specific values** go in templates gated by `stat` or data (see `dot_config/git/local.tmpl`, where commit signing is only enabled if the key exists). Never hardcode `/Users/<name>`. Use `$HOME`, `~`, or `{{ .chezmoi.homeDir }}`.
 
 ## Adding things
@@ -46,7 +47,8 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
   - Python CLIs not in Homebrew go in `uv-tools.txt`. The install script installs them and `dotfiles-doctor` checks them.
   - Some formulae aren't binaries (e.g. `antidote` is a sourced zsh script). Don't check them with `command -v`.
 - **A shell shortcut:** if it shadows a standard command (`ls`, `cat`, `grep`, `find`), use `zsh-abbr` in `dot_zshrc`, not `alias`, so agents and pasted commands still get the real tool. New names (`ll`, `la`) can be plain aliases. Shadowing an existing command needs `abbr -S -q -f … >/dev/null` (without `-f` it silently refuses).
-- **An env var for every shell** (PATH, telemetry opt-outs): `dot_zshenv`. Agents run non-interactive shells, so PATH set in `.zshrc` is invisible to them. Login-shell-only setup: `dot_zprofile`. Interactive-only: `dot_zshrc`.
+- **Telemetry opt-outs:** add them to `.chezmoidata/telemetry.toml` only. Use `env` for env vars, `claude_env` for Claude Code, and `commands` (`tool`/`run`/`check`) for settings stored in a tool's own config. `dotfiles-doctor` verifies all three.
+- **An env var for every shell** (PATH etc.): `dot_zshenv`. Agents run non-interactive shells, so PATH set in `.zshrc` is invisible to them. Login-shell-only setup: `dot_zprofile`. Interactive-only: `dot_zshrc`.
 
 ## Before committing
 

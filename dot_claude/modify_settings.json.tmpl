@@ -1,10 +1,16 @@
 #!/bin/sh
-# Writes claude-settings.json from the repo, keeping the local machine's
-# autoMode block (it holds private repo names and paths, so it stays out of git).
+# Builds ~/.claude/settings.json from claude-settings.json in the repo, plus:
+#   - telemetry env from .chezmoidata/telemetry.toml (claude_env)
+#   - the machine's local autoMode block (private repo names; never in git)
+# claude-sync does the reverse and strips both.
 set -eu
 current=$(mktemp)
 trap 'rm -f "$current"' EXIT
 cat > "$current"
 [ -s "$current" ] || echo '{}' > "$current"
-jq -s '.[0] + (if .[1].autoMode then {autoMode: .[1].autoMode} else {} end)' \
-  "{{ .chezmoi.sourceDir }}/claude-settings.json" "$current"
+jq -s --argjson telemetry '{{ .telemetry.claude_env | toJson }}' '
+  .[1] as $current
+  | .[0]
+  | .env = ((.env // {}) + $telemetry)
+  | . + (if $current.autoMode then {autoMode: $current.autoMode} else {} end)
+' "{{ .chezmoi.sourceDir }}/claude-settings.json" "$current"

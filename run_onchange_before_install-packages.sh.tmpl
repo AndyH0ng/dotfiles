@@ -7,12 +7,16 @@
 # opt-ins: {{ .install | toJson }}
 set -euo pipefail
 
+# telemetry env for this script too (.zshenv isn't loaded here)
+{{- range $k, $v := .telemetry.env }}
+export {{ $k }}={{ $v | quote }}
+{{- end }}
+
 if ! command -v brew >/dev/null 2>&1; then
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-brew analytics off
 # Homebrew only loads third-party formulae that are explicitly trusted.
 # Trust just tinty, not the whole tap.
 brew tap tinted-theming/tinted
@@ -30,13 +34,12 @@ grep -vE '^\s*(#|$)' "{{ .chezmoi.sourceDir }}/uv-tools.txt" | while read -r too
   uv tool install "$tool"
 done
 
-# telemetry settings that live in each tool's own config, not env vars
-gh config set telemetry disabled
-if command -v codex >/dev/null 2>&1; then
-  mkdir -p "$HOME/.codex" && touch "$HOME/.codex/config.toml"
-  grep -q '^\[analytics\]' "$HOME/.codex/config.toml" \
-    || printf '\n[analytics]\nenabled = false\n' >> "$HOME/.codex/config.toml"
+# telemetry opt-outs stored in each tool's own config (.chezmoidata/telemetry.toml)
+{{- range .telemetry.commands }}
+if command -v {{ .tool }} >/dev/null 2>&1; then
+  {{ .run }}
 fi
+{{- end }}
 
 # Claude Code MCP (runs before files are written: the first `claude`
 # invocation on a fresh Mac touches ~/.claude/settings.json, which chezmoi
