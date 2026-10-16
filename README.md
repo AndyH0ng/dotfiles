@@ -34,5 +34,5 @@ chezmoi는 심링크 모드로 동작한다. `~/.zshrc` 같은 일반 파일은 
 
 - `dotfiles-doctor`(에이전트용은 `dotfiles-doctor --json`)는 어긋난 부분을 보여준다: 저장소와 다른 파일, 설치 안 됐거나 Brewfile에 없는 패키지, Claude 설정 불일치, 커밋·push 안 한 변경.
 - pre-commit hook이 스테이징된 변경에 `gitleaks`를 돌린다. 설치 스크립트가 `core.hooksPath`로 켜 둔다.
-- CI는 새 macOS 러너에 전부 설치하고 zsh가 에러 없이 시작되는지 확인한다. push할 때와 매주 실행되고, Dependabot이 Actions 버전을 최신으로 유지한다.
+- CI는 새 macOS 러너에 전부 설치하고 zsh가 에러 없이 시작되는지 확인한다. push할 때와 매주 실행된다.
 - [AGENTS.md](AGENTS.md)(`CLAUDE.md`와 동일)에 AI 에이전트를 위한 저장소 규칙과 함정을 정리해 뒀다.
