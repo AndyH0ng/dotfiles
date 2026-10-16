@@ -1,3 +1,6 @@
+# Everything the dotfiles in this repo depend on. Personal apps and
+# extra CLIs live in Brewfile.extra (installed only if you opt in).
+
 tap "tinted-theming/tinted"
 
 # shell
@@ -18,6 +21,10 @@ brew "bat"
 brew "ripgrep"
 brew "fd"
 brew "git-delta"
+brew "git"
+brew "gh"              # git credential helper in .gitconfig
+brew "lazygit"
+brew "chezmoi"
 brew "uv"
 brew "ruff"
 brew "ty"

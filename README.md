@@ -8,7 +8,7 @@ macOS terminal setup, managed with [chezmoi](https://chezmoi.io).
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply AndyH0ng
 ```
 
-This installs Homebrew if needed, runs `brew bundle` with the [Brewfile](Brewfile), and applies the tinty theme.
+This installs Homebrew if needed, runs `brew bundle` with the [Brewfile](Brewfile), and applies the tinty theme. `chezmoi init` asks once whether to also install [Brewfile.extra](Brewfile.extra) (personal apps, fonts, extra CLIs).
 
 ## What's inside
 
@@ -33,6 +33,7 @@ Files ending in `.tmpl` are rendered copies. Edit them with `chezmoi edit <targe
 
 ## Maintenance
 
-- `dotfiles-doctor` reports drift: files that differ from the repo, Brewfile packages missing or unlisted, Claude settings out of sync, and uncommitted or unpushed changes.
+- `dotfiles-doctor` (or `dotfiles-doctor --json` for agents) reports drift: files that differ from the repo, Brewfile packages missing or unlisted, Claude settings out of sync, and uncommitted or unpushed changes.
 - A pre-commit hook runs `gitleaks` on staged changes. The install script enables it via `core.hooksPath`.
-- CI installs everything on a fresh macOS runner and checks that zsh starts cleanly.
+- CI installs everything on a fresh macOS runner and checks that zsh starts cleanly. It runs on push and weekly, and Dependabot keeps the Actions up to date.
+- [AGENTS.md](AGENTS.md) (also `CLAUDE.md`) documents the repo's conventions and pitfalls for AI agents.

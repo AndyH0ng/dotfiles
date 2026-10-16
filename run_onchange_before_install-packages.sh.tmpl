@@ -1,6 +1,7 @@
 #!/bin/bash
 # Runs before files are written, so tools like jq exist for modify_ scripts.
 # Brewfile hash: {{ include "Brewfile" | sha256sum }}
+# Brewfile.extra hash: {{ include "Brewfile.extra" | sha256sum }} (installExtras={{ .installExtras }})
 set -euo pipefail
 
 if ! command -v brew >/dev/null 2>&1; then
@@ -14,7 +15,13 @@ brew analytics off
 brew tap tinted-theming/tinted
 brew trust --formula tinted-theming/tinted/tinty
 
-brew bundle --file="{{ .chezmoi.sourceDir }}/Brewfile"
+brew bundle --no-upgrade --file="{{ .chezmoi.sourceDir }}/Brewfile"
+{{- if .installExtras }}
+
+brew tap openemu-silicon/openemu-silicon https://github.com/OpenEmu-Silicon/OpenEmu-Silicon
+brew trust --cask openemu-silicon/openemu-silicon/openemu-silicon
+brew bundle --no-upgrade --file="{{ .chezmoi.sourceDir }}/Brewfile.extra"
+{{- end }}
 
 # telemetry settings that live in each tool's own config, not env vars
 gh config set telemetry disabled

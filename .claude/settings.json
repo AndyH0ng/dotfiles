@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chezmoi status:*)",
+      "Bash(chezmoi diff:*)",
+      "Bash(chezmoi managed:*)",
+      "Bash(chezmoi cat:*)",
+      "Bash(chezmoi source-path:*)",
+      "Bash(chezmoi execute-template:*)",
+      "Bash(brew bundle check:*)",
+      "Bash(brew info:*)",
+      "Bash(dotfiles-doctor:*)",
+      "Bash(~/.local/bin/dotfiles-doctor:*)",
+      "Bash(gitleaks dir:*)",
+      "Bash(gitleaks git:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh run watch:*)"
+    ]
+  }
+}

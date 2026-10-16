@@ -1,0 +1,70 @@
+# Personal apps, fonts and extra CLIs — not needed by the dotfiles.
+# Installed only when installExtras is true (asked once on `chezmoi init`).
+
+tap "openemu-silicon/openemu-silicon", "https://github.com/OpenEmu-Silicon/OpenEmu-Silicon"
+
+# ---- CLIs ----
+brew "bottom"
+brew "duti"
+brew "exiftool"
+brew "ffmpeg"
+brew "fish"
+brew "httpie"
+brew "imagemagick"
+brew "sqlite"
+brew "tesseract"
+brew "tesseract-lang"
+brew "tlrc"
+brew "typst"
+brew "yt-dlp"
+
+# ---- AI / dev ----
+cask "antigravity-cli"
+cask "claude"
+cask "coderabbit"
+cask "codex"
+cask "google-gemini"
+cask "intellij-idea"
+cask "orbstack"
+cask "webstorm"
+cask "google-chrome@canary"
+cask "figma"
+
+# ---- productivity / security ----
+cask "1password"
+cask "1password-cli"
+cask "proton-pass"
+cask "adguard"
+cask "aside"
+cask "notion"
+cask "launchos"
+cask "adobe-creative-cloud"
+
+# ---- media / games / misc ----
+cask "discord"
+cask "iina"
+cask "transmission"
+cask "steam"
+cask "modrinth"
+cask "openemu-silicon/openemu-silicon/openemu-silicon"
+
+# ---- fonts ----
+cask "font-batang"
+cask "font-batangche"
+cask "font-cascadia-code"
+cask "font-gaegu"
+cask "font-google-sans-code"
+cask "font-gowun-batang"
+cask "font-hahmlet"
+cask "font-hi-melody"
+cask "font-ibm-plex-sans-kr"
+cask "font-jeju-myeongjo"
+cask "font-ko-pub-batang"
+cask "font-nanum-myeongjo"
+cask "font-nanum-pen-script"
+cask "font-noto-serif-kr"
+cask "font-pretendard"
+cask "font-sf-compact"
+cask "font-sf-mono"
+cask "font-sf-pro"
+cask "font-song-myung"
