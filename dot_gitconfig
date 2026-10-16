@@ -1,0 +1,65 @@
+# ~/.gitconfig is a symlink into ~/dotfiles, so `git config --global`
+# edits the repo directly. Machine-specific bits (commit signing) live in
+# ~/.config/git/local, which chezmoi renders only if the key exists.
+
+[user]
+	name = Andy Hong
+	email = red@soongsil.ac.kr
+
+[include]
+	path = ~/.config/git/local
+
+[core]
+	excludesFile = ~/.config/git/ignore
+	pager = delta
+
+[init]
+	defaultBranch = main
+
+[credential "https://github.com"]
+	helper =
+	helper = !gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !gh auth git-credential
+
+# ---- defaults recommended by git core devs ----
+[diff]
+	algorithm = histogram
+	colorMoved = plain
+	mnemonicPrefix = true
+	renames = true
+[merge]
+	conflictStyle = zdiff3
+[rerere]
+	enabled = true
+	autoUpdate = true
+[push]
+	default = simple
+	autoSetupRemote = true
+	followTags = true
+[fetch]
+	prune = true
+	pruneTags = true
+[rebase]
+	autoSquash = true
+	autoStash = true
+	updateRefs = true
+[commit]
+	verbose = true
+[branch]
+	sort = -committerdate
+[tag]
+	sort = version:refname
+[column]
+	ui = auto
+[help]
+	autocorrect = prompt
+
+# ---- delta ----
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true             # n / N jump between files
+	line-numbers = true
+	syntax-theme = base16       # uses the terminal's ANSI palette, so it follows tinty

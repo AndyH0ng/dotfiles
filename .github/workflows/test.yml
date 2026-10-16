@@ -29,7 +29,7 @@ jobs:
         run: |
           eval "$(/opt/homebrew/bin/brew shellenv)"
           test -f "$(brew --prefix)/opt/antidote/share/antidote/antidote.zsh"  # antidote is a sourced zsh function, not a binary
-          for t in starship vivid tinty mise zoxide fzf atuin eza bat rg fd uv ruff ty jq xh gitleaks; do
+          for t in starship vivid tinty mise zoxide fzf atuin eza bat rg fd uv ruff ty jq xh gitleaks delta; do
             command -v "$t" >/dev/null || { echo "missing: $t"; exit 1; }
           done
 
@@ -53,3 +53,7 @@ jobs:
           test -x ~/.claude/statusline.sh
           echo '{"model":{"display_name":"x"},"workspace":{"current_dir":"/tmp"}}' | ~/.claude/statusline.sh
           jq -e '.statusLine' ~/.claude/settings.json >/dev/null
+          test -L ~/.gitconfig
+          test "$(git config --global --get merge.conflictStyle)" = zdiff3
+          # no signing key on the runner, so signing must stay off
+          test -z "$(git config --global --includes --get commit.gpgSign)"

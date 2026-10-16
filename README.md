@@ -17,6 +17,7 @@ This installs Homebrew if needed, runs `brew bundle` with the [Brewfile](Brewfil
 - **Theme**: base16-snazzy, defined once in [`.chezmoidata/theme.toml`](.chezmoidata/theme.toml) and rendered into Ghostty, starship, the Claude Code statusline, [tinty](https://github.com/tinted-theming/tinty) (shell + fzf) and `vivid` (`LS_COLORS`)
 - **Tools**: mise (language runtimes), zoxide, fzf, atuin, eza, bat, ripgrep, fd, xh, fastfetch
 - **Python**: uv, ruff, ty
+- **Git**: modern defaults (histogram diff, zdiff3, rerere, autoSetupRemote), [delta](https://github.com/dandavison/delta) as pager (also in lazygit), SSH commit signing enabled only when the key exists
 - **Claude Code**: `settings.json` (plugins, theme, statusline) and a base16-snazzy [statusline](dot_claude/executable_statusline.sh.tmpl)
 
 - **Privacy**: telemetry off for Homebrew, gh, Claude Code, Codex, CodeRabbit and common JS tooling (`DO_NOT_TRACK` etc. in `.zshenv`)

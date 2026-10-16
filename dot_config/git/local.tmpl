@@ -1,0 +1,12 @@
+# rendered by chezmoi — signing only on machines that have the key
+{{- $key := joinPath .chezmoi.homeDir ".ssh/id_ed25519_signing.pub" }}
+{{- if stat $key }}
+[user]
+	signingKey = {{ $key }}
+[gpg]
+	format = ssh
+[gpg "ssh"]
+	allowedSignersFile = {{ joinPath .chezmoi.homeDir ".ssh/allowed_signers" }}
+[commit]
+	gpgSign = true
+{{- end }}
