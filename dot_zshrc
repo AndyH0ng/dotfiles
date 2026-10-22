@@ -13,6 +13,13 @@ unset _stale
 source ~/.config/zsh/theme.zsh
 export LS_COLORS="$(vivid generate "$VIVID_THEME")"
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+# smart case: lowercase matches either case, uppercase only itself
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' menu no                   # fzf-tab replaces the menu
+zstyle ':completion:*:descriptions' format '[%d]' # fzf-tab needs this for groups
+zstyle ':completion:*:git-checkout:*' sort false # keep git's recency order
+zstyle ':fzf-tab:*' switch-group '<' '>'
+zstyle ':fzf-tab:complete:(cd|__zoxide_z):*' fzf-preview 'eza -1 --color=always --icons $realpath'
 
 # ---- tinty ----
 export BASE16_SHELL_SET_BACKGROUND=false
@@ -30,8 +37,16 @@ eval "$(starship init zsh)"
 # ---- dev tooling ----
 eval "$(mise activate zsh)"
 eval "$(zoxide init zsh)"
+# fd: respects .gitignore and includes dotfiles (fzf's own walker does neither)
+export FZF_DEFAULT_COMMAND='fd --hidden --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_CTRL_T_OPTS="--preview '[ -d {} ] && eza --tree --level=2 --color=always --icons {} || bat --color=always --style=numbers --line-range=:200 {}'"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --exclude .git'
+export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --color=always --icons {}'"
 source <(fzf --zsh)
 eval "$(atuin init zsh)"
+# after path_helper and mise, so it lands ahead of /bin in Claude Code's PATH snapshot
+[[ -n $CLAUDECODE ]] && path=(~/.local/agent-bin $path)
 
 # ---- aliases ----
 alias ll='eza -l --icons --group-directories-first'
@@ -40,8 +55,8 @@ alias tree='eza --tree --icons'
 # abbreviations, not aliases: pasted commands with POSIX flags still get the real tool
 abbr -S -q -f ls='eza --icons --group-directories-first' >/dev/null
 abbr -S -q -f cat='bat --style=plain' >/dev/null
-abbr -S -q -f grep='rg' >/dev/null
-abbr -S -q -f find='fd' >/dev/null
+alias grep='ugrep -G --ignore-files --hidden -I --exclude-dir=.git'
+alias find='bfs -regextype findutils-default'
 
 # ---- history ----
 HISTFILE=~/.zsh_history

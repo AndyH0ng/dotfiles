@@ -5,9 +5,16 @@ set -euo pipefail
 {{- $kind := kindOf .value }}
 defaults write {{ .domain }} {{ .key }} {{ if eq $kind "bool" }}-bool {{ .value }}{{ else if eq $kind "string" }}-string {{ .value | quote }}{{ else if eq $kind "float64" }}-float {{ .value }}{{ else }}-int {{ .value }}{{ end }}
 {{- end }}
+{{ range .macos.default_apps }}
+{{-   if index $.install .group }}
+{{-     $app := .app }}
+{{-     range .extensions }}
+duti -s {{ $app }} .{{ . }} all
+{{-     end }}
+{{-   end }}
+{{- end }}
 {{- $restart := list }}
 {{- range .macos.defaults }}{{ if hasKey . "restart" }}{{ $restart = append $restart .restart }}{{ end }}{{ end }}
-
 
 # || true: may not be running (CI)
 {{- range $restart | uniq }}

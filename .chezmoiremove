@@ -1,0 +1,3 @@
+# Targets in $HOME to delete on apply: list a file here when you remove or
+# rename its source so the old target doesn't linger. dotfiles-doctor flags
+# any dangling symlink into the repo that's missing from this list.

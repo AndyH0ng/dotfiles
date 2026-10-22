@@ -5,6 +5,9 @@ src=$(chezmoi source-path)
 
 # chezmoi
 chezmoi_drift=$(chezmoi status --exclude scripts)
+# symlinks into the repo whose source is gone (deleted without .chezmoiremove)
+dangling=$(chezmoi managed -i files -p absolute | sed 's|/[^/]*$||' | sort -u \
+  | while read -r d; do find "$d" -maxdepth 1 -type l -lname "$src/*" ! -exec test -e {} \; -print; done)
 
 # brew
 data=$(chezmoi data --format json)
@@ -76,6 +79,14 @@ macos_mismatch=$(printf '%s' "$data" | jq -r '.macos.defaults[]
       got=$(defaults read "$domain" "$key" 2>/dev/null)
       [ "$got" = "$want" ] || echo "$domain $key: want $want, got ${got:-unset}"
     done)
+# default apps, for opted-in groups only
+macos_mismatch="$macos_mismatch$(printf '%s' "$data" | jq -r '.install as $on | .macos.default_apps[]
+    | select($on[.group] == true) | .app as $app | .extensions[] | "\($app)\t\(.)"' \
+  | while IFS="$(printf '\t')" read -r app ext; do
+      got=$(duti -x "$ext" 2>/dev/null | sed -n 3p)
+      [ "$got" = "$app" ] || printf '\n.%s opens with %s, want %s' "$ext" "${got:-nothing}" "$app"
+    done)"
+macos_mismatch=$(printf '%s' "$macos_mismatch" | sed '/^$/d')
 
 # git
 git -C "$src" fetch -q 2>/dev/null
@@ -85,7 +96,7 @@ behind=$(git -C "$src" rev-list --count 'HEAD..@{u}' 2>/dev/null || echo 0)
 
 ok=true
 # brew_unlisted is informational, so it doesn't fail
-[ -n "$chezmoi_drift$brew_missing$uv_missing$theme_mismatch$font_mismatch$telemetry_off$macos_mismatch$git_status" ] && ok=false
+[ -n "$chezmoi_drift$dangling$brew_missing$uv_missing$theme_mismatch$font_mismatch$telemetry_off$macos_mismatch$git_status" ] && ok=false
 [ "$claude_sync" = false ] || [ "$ahead" -gt 0 ] || [ "$behind" -gt 0 ] && ok=false
 
 lines() { printf '%s\n' "$1" | jq -R . | jq -s 'map(select(length > 0))'; }
@@ -94,6 +105,7 @@ if [ "${1:-}" = "--json" ]; then
   jq -n \
     --argjson ok "$ok" \
     --argjson chezmoi "$(lines "$chezmoi_drift")" \
+    --argjson dangling "$(lines "$dangling")" \
     --argjson missing "$(lines "$brew_missing")" \
     --argjson unlisted "$(lines "$brew_unlisted")" \
     --argjson uv "$(lines "$uv_missing")" \
@@ -107,6 +119,7 @@ if [ "${1:-}" = "--json" ]; then
     --argjson ahead "$ahead" --argjson behind "$behind" \
     '{ok: $ok,
       chezmoi_drift: $chezmoi,
+      dangling_symlinks: $dangling,
       brew: {missing: $missing, unlisted: $unlisted},
       uv_tools_missing: $uv,
       theme_mismatch: $theme,
@@ -117,13 +130,14 @@ if [ "${1:-}" = "--json" ]; then
       git: {uncommitted: $git, ahead: $ahead, behind: $behind},
       fixes: {
         chezmoi_drift: "chezmoi diff, then chezmoi apply (repo wins) or edit the repo",
+        dangling_symlinks: "add each path (relative to $HOME) to .chezmoiremove, then chezmoi apply",
         brew_missing: ("chezmoi apply (or brew bundle --file " + $src + "/Brewfile[.group])"),
         brew_unlisted: "informational only: packages you installed by hand. Do not add them to a Brewfile unless the user asks",
         uv_tools_missing: "chezmoi apply (or uv tool install <name>)",
         theme_mismatch: "copy the palette for theme.scheme from the tinty scheme yaml into .chezmoidata/theme.toml",
         font_mismatch: "every theme.font.families cask must be in Brewfile and its name must match `ghostty +list-fonts` exactly",
         telemetry_on: "chezmoi apply (runs the opt-out commands); new tools go in .chezmoidata/telemetry.toml",
-        macos_defaults_mismatch: "chezmoi apply, or change the value in .chezmoidata/macos.toml. A key that never sticks was likely dropped by a macOS update",
+        macos_defaults_mismatch: "chezmoi apply, or change the value in .chezmoidata/macos.toml. A key that never sticks was likely dropped by a macOS update; a default app that reverts was changed in Finder (Get Info → Open with)",
         claude_settings: "claude-sync",
         git_behind: "chezmoi update"
       }}'
@@ -131,6 +145,7 @@ else
   section() { printf '\n\033[1m%s\033[0m\n' "$1"; }
   show() { if [ -n "$1" ]; then printf '%s\n' "$1" | sed 's/^/  /'; else echo "  none"; fi; }
   section "chezmoi: files that differ from the repo"; show "$chezmoi_drift"
+  section "symlinks into the repo whose source is gone"; show "$dangling"
   section "Brewfiles (opted-in): listed but not installed"; show "$brew_missing"
   section "Brewfiles: installed but not listed (informational)"; show "$(printf '%s' "$brew_unlisted" | tr '\n' ' ')"
   section "uv tools: listed but not installed"; show "$uv_missing"

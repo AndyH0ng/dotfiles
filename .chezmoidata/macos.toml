@@ -56,3 +56,10 @@ value = true
 domain = "com.apple.desktopservices"
 key = "DSDontWriteUSBStores"
 value = true
+
+# default apps (duti), only where the app's optional group is installed.
+# An extension without a registered UTI (dyn.*: cts, jsx, cjs, jsonc, scss) can't be set.
+[[macos.default_apps]]
+app = "com.jetbrains.WebStorm"
+group = "dev"
+extensions = ["ts", "tsx", "mts", "js", "mjs", "json", "md", "mdx", "yaml", "yml", "toml", "css", "sh", "zsh"]

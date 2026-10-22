@@ -42,7 +42,7 @@ jobs:
           eval "$(brew shellenv 2>/dev/null || /opt/homebrew/bin/brew shellenv)"
           export PATH="$HOME/.local/bin:$PATH"
           dotfiles-doctor --json | tee "$RUNNER_TEMP/doctor.json" || true
-          jq -e '.chezmoi_drift == [] and .brew.missing == [] and .uv_tools_missing == []
+          jq -e '.chezmoi_drift == [] and .dangling_symlinks == [] and .brew.missing == [] and .uv_tools_missing == []
                  and .theme_mismatch == [] and .font_mismatch == []
                  and .telemetry_on == [] and .macos_defaults_mismatch == []
                  and .claude_settings_in_sync' "$RUNNER_TEMP/doctor.json"

@@ -1,0 +1,60 @@
+#!/bin/zsh
+# rm for AI agents (on PATH only when $CLAUDECODE is set, see .zshenv):
+# same flags and exit codes as rm, but moves to the Trash. Temp dirs are deleted.
+
+force=0 recursive=0 dir=0 verbose=0
+while (( $# )); do
+  case $1 in
+    --) shift; break ;;
+    --force) force=1 ;;
+    --recursive) recursive=1 ;;
+    --dir) dir=1 ;;
+    --verbose) verbose=1 ;;
+    -?*)
+      for flag in ${(s::)1#-}; do
+        case $flag in
+          f) force=1 ;;
+          r|R) recursive=1 ;;
+          d) dir=1 ;;
+          v) verbose=1 ;;
+          i|I|P|W|x) ;;
+          *) print -u2 "rm: illegal option -- $flag"; exit 64 ;;
+        esac
+      done ;;
+    *) break ;;
+  esac
+  shift
+done
+
+if (( ! $# )); then
+  (( force )) && exit 0
+  print -u2 "usage: rm [-f | -i] [-dIRrvWx] file ..."
+  exit 64
+fi
+
+tmp=(/tmp /private/tmp ${TMPDIR:+${TMPDIR%/}} ${TMPDIR:+/private${TMPDIR%/}})
+rc=0
+for p in "$@"; do
+  if [[ ${p:t} == (.|..) ]]; then
+    print -u2 'rm: "." and ".." may not be removed'; rc=1; continue
+  fi
+  if [[ ! -e $p && ! -L $p ]]; then
+    (( force )) || { print -u2 "rm: $p: No such file or directory"; rc=1; }
+    continue
+  fi
+  if [[ -d $p && ! -L $p ]] && (( ! recursive )); then
+    if (( ! dir )) || [[ -n $(print -rl -- $p/*(DN[1])) ]]; then
+      print -u2 "rm: $p: is a directory"; rc=1; continue
+    fi
+  fi
+  abs=${p:a}
+  in_tmp=0
+  for t in $tmp; do [[ $abs == $t/* ]] && in_tmp=1; done
+  if (( in_tmp )); then
+    /bin/rm -rf -- "$p" || rc=1
+  else
+    /usr/bin/trash "$abs" >/dev/null || rc=1
+  fi
+  (( verbose )) && print -r -- "$p"
+done
+exit $rc
