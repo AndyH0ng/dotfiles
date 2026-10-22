@@ -1,0 +1,47 @@
+#!/bin/bash
+# Keeps the Mac awake through a lid close while Claude Code is working.
+# Claude Code runs `caffeinate -i` while it works, but closing the lid sleeps the
+# Mac regardless; only `pmset disablesleep` survives it, and that needs root
+# (/etc/sudoers.d/agent-sleep-guard allows exactly the two calls below).
+# A LaunchAgent runs this every 30s (run_after_agent-sleep-guard.sh.tmpl).
+set -uo pipefail
+
+grace_min=${AGENT_SLEEP_GUARD_GRACE_MIN:-5}
+batt_floor=${AGENT_SLEEP_GUARD_BATT_FLOOR:-30}
+sudo -n -l /usr/bin/pmset -a disablesleep 1 >/dev/null 2>&1 || exit 0
+state="${XDG_STATE_HOME:-$HOME/.local/state}/agent-sleep-guard"
+mkdir -p "$state"
+now=$(date +%s)
+
+working() {
+  local pid ppid
+  for pid in $(pgrep -x caffeinate); do
+    ppid=$(ps -o ppid= -p "$pid" | tr -d ' ')
+    [ "$(basename "$(ps -o comm= -p "$ppid")")" = claude ] && return 0
+  done
+  return 1
+}
+
+# written as `disablesleep`, read back as `SleepDisabled`
+held() { [ "$(pmset -g | awk '$1 == "SleepDisabled" { print $2 }')" = 1 ]; }
+
+set_sleep() {
+  local want=$1 cur=0
+  held && cur=1
+  [ "$cur" = "$want" ] && return 0
+  sudo -n /usr/bin/pmset -a disablesleep "$want" \
+    && echo "$(date '+%F %T') disablesleep=$want: $2"
+}
+
+working && echo "$now" >"$state/last-working"
+last=$(cat "$state/last-working" 2>/dev/null || echo 0)
+batt=$(pmset -g batt)
+pct=$(printf '%s' "$batt" | grep -o '[0-9]*%' | tr -d %)
+
+if ! printf '%s' "$batt" | grep -q "AC Power" && [ "${pct:-100}" -lt "$batt_floor" ]; then
+  set_sleep 0 "battery ${pct}% < ${batt_floor}%"
+elif [ $((now - last)) -lt $((grace_min * 60)) ]; then
+  set_sleep 1 "Claude Code working"
+else
+  set_sleep 0 "idle ${grace_min}m"
+fi

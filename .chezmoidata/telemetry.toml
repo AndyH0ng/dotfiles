@@ -1,4 +1,4 @@
-#   env         every shell + the install script
+#   env         every shell + the install script (HOMEBREW_* also go to brew.env)
 #   claude_env  ~/.claude/settings.json "env" (the desktop app doesn't inherit the shell env)
 #   commands    install runs `run`, doctor runs `check` (exit 0 = off)
 # chrome-devtools-mcp's flag lives in its MCP registration in the install script.

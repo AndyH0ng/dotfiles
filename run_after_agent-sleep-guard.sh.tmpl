@@ -1,0 +1,61 @@
+#!/bin/bash
+# Runs on every apply and changes nothing once installed. Root files prompt for
+# sudo only when missing or changed. CI has no login session.
+set -euo pipefail
+[ -n "${CI:-}" ] && exit 0
+
+label=local.agent-sleep-guard
+guard="$HOME/.local/bin/agent-sleep-guard"
+sudoers=/etc/sudoers.d/agent-sleep-guard
+daemon=/Library/LaunchDaemons/$label-reset.plist
+agent="$HOME/Library/LaunchAgents/$label.plist"
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+echo "$(id -un) ALL=(root) NOPASSWD: /usr/bin/pmset -a disablesleep 0, /usr/bin/pmset -a disablesleep 1" >"$tmp/sudoers"
+
+# clears a hold left by a crash, at every boot
+cat >"$tmp/daemon" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>$label-reset</string>
+  <key>ProgramArguments</key>
+  <array><string>/usr/bin/pmset</string><string>-a</string><string>disablesleep</string><string>0</string></array>
+  <key>RunAtLoad</key><true/>
+</dict>
+</plist>
+EOF
+
+cat >"$tmp/agent" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>$label</string>
+  <key>ProgramArguments</key><array><string>$guard</string></array>
+  <key>StartInterval</key><integer>30</integer>
+  <key>RunAtLoad</key><true/>
+  <key>StandardOutPath</key><string>$HOME/Library/Logs/agent-sleep-guard.log</string>
+  <key>StandardErrorPath</key><string>$HOME/Library/Logs/agent-sleep-guard.log</string>
+</dict>
+</plist>
+EOF
+
+if ! sudo -n -l /usr/bin/pmset -a disablesleep 1 >/dev/null 2>&1 || ! cmp -s "$tmp/daemon" "$daemon"; then
+  if [ ! -t 0 ]; then
+    echo "agent-sleep-guard: skipped root setup (needs sudo; rerun chezmoi apply in a terminal)" >&2
+  else
+    visudo -cqf "$tmp/sudoers"
+    sudo install -m 440 -o root -g wheel "$tmp/sudoers" "$sudoers"
+    sudo install -m 644 -o root -g wheel "$tmp/daemon" "$daemon"
+  fi
+fi
+
+if ! cmp -s "$tmp/agent" "$agent" || ! launchctl print "gui/$(id -u)/$label" >/dev/null 2>&1; then
+  mkdir -p "$HOME/Library/LaunchAgents"
+  cp "$tmp/agent" "$agent"
+  launchctl bootout "gui/$(id -u)/$label" 2>/dev/null || true
+  launchctl bootstrap "gui/$(id -u)" "$agent"
+fi
