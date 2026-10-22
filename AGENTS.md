@@ -28,7 +28,7 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 | `dot_config/mise/mise.lock` | Exact runtime versions + checksums that `latest`/`lts` resolve to |
 | `claude-settings.json` | Source for `~/.claude/settings.json` (see below) |
 | `dot_local/bin/` | `claude-sync`, `dotfiles-doctor` |
-| `dot_local/agent-bin/` | Commands that replace standard ones for AI agents only (`rm` → Trash). `dot_zshrc` puts it first on PATH when `$CLAUDECODE` is set |
+| `dot_local/agent-bin/` | Commands that replace standard ones for AI agents only (`rm` → Trash). `dot_zshenv` and `dot_zprofile` put it first on PATH when `$CLAUDECODE` is set |
 | `.githooks/lint` | shellcheck (rendered scripts), actionlint, zizmor. Run by pre-commit **and** CI |
 | `.githooks/pre-commit` | `.githooks/lint`, then gitleaks on staged changes |
 | `.github/workflows/test.yml` | Fresh-macOS install test, weekly + on push |

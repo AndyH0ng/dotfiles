@@ -45,8 +45,6 @@ export FZF_ALT_C_COMMAND='fd --type d --hidden --exclude .git'
 export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --color=always --icons {}'"
 source <(fzf --zsh)
 eval "$(atuin init zsh)"
-# after path_helper and mise, so it lands ahead of /bin in Claude Code's PATH snapshot
-[[ -n $CLAUDECODE ]] && path=(~/.local/agent-bin $path)
 
 # ---- aliases ----
 alias ll='eza -l --icons --group-directories-first'
