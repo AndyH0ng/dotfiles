@@ -1,5 +1,5 @@
 #!/bin/zsh
-# rm for AI agents (on PATH only when $CLAUDECODE is set, see .zshenv):
+# rm for AI agents (on PATH only when $CLAUDECODE is set, see .zshrc):
 # same flags and exit codes as rm, but moves to the Trash. Temp dirs are deleted.
 
 force=0 recursive=0 dir=0 verbose=0
