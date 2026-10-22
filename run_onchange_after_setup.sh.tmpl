@@ -1,12 +1,13 @@
 #!/bin/bash
-# Runs after files are written, so mise's and tinty's configs are in place.
+# after files are written, so mise's and tinty's configs are in place
 # mise config hash: {{ include "dot_config/mise/config.toml" | sha256sum }}
+# mise lock hash: {{ include "dot_config/mise/mise.lock" | sha256sum }}
 # theme: {{ .theme.scheme }}
 set -euo pipefail
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# language runtimes come from mise (brew is for CLIs and apps)
-cd "$HOME" && mise install --yes
+# --locked: install exactly what mise.lock pins, never re-resolve latest/lts
+cd "$HOME" && mise install --yes --locked
 
 tinty install
 tinty apply {{ .theme.scheme | quote }}

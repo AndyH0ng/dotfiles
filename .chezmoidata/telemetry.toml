@@ -1,16 +1,10 @@
-# Telemetry opt-outs — the single place they're defined.
-#   env         exported in every shell (~/.config/zsh/telemetry.zsh, sourced by
-#               .zshenv) and in the install script itself
-#   claude_env  injected into ~/.claude/settings.json "env" (Claude Code launched
-#               from the desktop app doesn't inherit the shell environment)
-#   commands    opt-outs stored in a tool's own config; the install script runs
-#               `run` when `tool` is installed, dotfiles-doctor runs `check`
-#               (exit 0 = off)
-# Not here: chrome-devtools-mcp's --no-usage-statistics lives in its MCP
-# registration in the install script, next to its other flags.
+#   env         every shell + the install script
+#   claude_env  ~/.claude/settings.json "env" (the desktop app doesn't inherit the shell env)
+#   commands    install runs `run`, doctor runs `check` (exit 0 = off)
+# chrome-devtools-mcp's flag lives in its MCP registration in the install script.
 
 [telemetry.env]
-DO_NOT_TRACK = "1"                  # generic (bun, astro, turbo, …)
+DO_NOT_TRACK = "1"
 HOMEBREW_NO_ANALYTICS = "1"
 CR_CLI_TELEMETRY_DISABLED = "1"     # coderabbit
 NEXT_TELEMETRY_DISABLED = "1"

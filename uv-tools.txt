@@ -1,2 +1,2 @@
-# Python CLIs not in Homebrew, installed with `uv tool install` (one per line)
+# Python CLIs not in Homebrew (`uv tool install`)
 pyrefly

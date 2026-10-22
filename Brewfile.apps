@@ -1,4 +1,3 @@
-# Everyday apps (opt-in group "apps", see .chezmoidata/packages.toml)
 cask "adguard"
 cask "notion"
 cask "launchos"

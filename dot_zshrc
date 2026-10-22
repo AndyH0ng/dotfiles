@@ -1,14 +1,15 @@
-# ~/.zshrc
-
 # ---- completion ----
 autoload -Uz compinit
-# full compinit (security check + rebuild) at most once a day, else use the cache.
-# The glob must be expanded in a for loop: inside [[ ]] it isn't, so the
-# test would always be true.
-for _ in ~/.zcompdump(N.mh+24); do compinit; done
-compinit -C
+# full compinit at most once a day. The glob qualifier doesn't expand inside [[ ]].
+_stale=(~/.zcompdump(N.mh+24))
+if (( $#_stale )) || [[ ! -s ~/.zcompdump ]]; then
+  compinit
+  zcompile ~/.zcompdump
+else
+  compinit -C
+fi
+unset _stale
 
-# theme names come from ~/.config/zsh/theme.zsh (rendered by chezmoi)
 source ~/.config/zsh/theme.zsh
 export LS_COLORS="$(vivid generate "$VIVID_THEME")"
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
@@ -19,7 +20,7 @@ TINTY_ARTIFACTS="$HOME/.local/share/tinted-theming/tinty/artifacts"
 [ -f "$TINTY_ARTIFACTS/tinted-shell-scripts-file.sh" ] && . "$TINTY_ARTIFACTS/tinted-shell-scripts-file.sh"
 [ -f "$TINTY_ARTIFACTS/tinted-fzf-sh-file.sh" ] && . "$TINTY_ARTIFACTS/tinted-fzf-sh-file.sh"
 
-# ---- antidote ----
+# ---- plugins ----
 source /opt/homebrew/opt/antidote/share/antidote/antidote.zsh
 antidote load ~/.zsh_plugins.txt
 
@@ -32,16 +33,11 @@ eval "$(zoxide init zsh)"
 source <(fzf --zsh)
 eval "$(atuin init zsh)"
 
-
-# ---- modern CLI replacements ----
-# ls shadows a POSIX tool, so it's an abbreviation (see below); ll/la/tree
-# don't shadow anything standard, so plain aliases are fine
+# ---- aliases ----
 alias ll='eza -l --icons --group-directories-first'
 alias la='eza -la --icons --group-directories-first'
 alias tree='eza --tree --icons'
-# ls/cat/grep/find are abbreviations, not aliases: they expand on space so
-# you see what runs, and pasted commands using POSIX flags still work
-# (delete the expansion to get the original tool)
+# abbreviations, not aliases: pasted commands with POSIX flags still get the real tool
 abbr -S -q -f ls='eza --icons --group-directories-first' >/dev/null
 abbr -S -q -f cat='bat --style=plain' >/dev/null
 abbr -S -q -f grep='rg' >/dev/null
@@ -56,11 +52,14 @@ setopt HIST_IGNORE_SPACE
 setopt SHARE_HISTORY
 setopt INC_APPEND_HISTORY
 
+# ---- machine-local (not in git) ----
+[[ -r ~/.zshrc.local ]] && source ~/.zshrc.local
+
 # ---- syntax highlighting (must be last) ----
 eval "$(/opt/homebrew/opt/zsh-patina/bin/zsh-patina activate)"
 
-# ---- fastfetch (once, right before the first prompt draws so the
-# terminal has reported its real size — avoids the logo misaligning) ----
+# ---- fastfetch ----
+# on the first precmd, once the terminal has reported its size (else the logo misaligns)
 autoload -Uz add-zsh-hook
 _fastfetch_once() {
   fastfetch

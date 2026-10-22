@@ -1,4 +1,4 @@
-# rendered by chezmoi — signing only on machines that have the key
+# signing only on machines that have the key
 {{- $key := joinPath .chezmoi.homeDir ".ssh/id_ed25519_signing.pub" }}
 {{- if stat $key }}
 [user]

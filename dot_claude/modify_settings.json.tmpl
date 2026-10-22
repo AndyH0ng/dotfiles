@@ -1,8 +1,5 @@
 #!/bin/sh
-# Builds ~/.claude/settings.json from claude-settings.json in the repo, plus:
-#   - telemetry env from .chezmoidata/telemetry.toml (claude_env)
-#   - the machine's local autoMode block (private repo names; never in git)
-# claude-sync does the reverse and strips both.
+# claude-settings.json + telemetry env + this machine's autoMode (never in git)
 set -eu
 current=$(mktemp)
 trap 'rm -f "$current"' EXIT

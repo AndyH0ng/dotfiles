@@ -6,7 +6,7 @@ on:
   pull_request:
   workflow_dispatch:
   schedule:
-    # weekly, to catch upstream breakage (renamed formulae, tap trust, …)
+    # weekly: upstream breakage (renamed formulae, tap trust, …)
     - cron: "0 3 * * 1"
 
 permissions:
@@ -14,19 +14,19 @@ permissions:
 
 jobs:
   install:
-    # fresh macOS runner: the same path a new Mac takes
     runs-on: macos-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           fetch-depth: 0 # full history for the secret scan
+          persist-credentials: false
 
       - name: Install chezmoi
         run: brew install chezmoi
 
       - name: chezmoi init --apply
-        # --promptDefaults: every optional group takes its default (off)
+        # --promptDefaults: every optional group off
         run: chezmoi init --apply --no-tty --promptDefaults --source "$GITHUB_WORKSPACE"
 
       - name: Interactive zsh starts cleanly
@@ -38,37 +38,33 @@ jobs:
           echo "$out" | grep -q '^abbr-ok' || exit 1
 
       - name: dotfiles-doctor reports no drift
-        # covers every opted-in Brewfile, uv-tools.txt, theme palette vs tinty,
-        # rendered files and Claude settings — no hand-copied tool list here
         run: |
           eval "$(brew shellenv 2>/dev/null || /opt/homebrew/bin/brew shellenv)"
           export PATH="$HOME/.local/bin:$PATH"
           dotfiles-doctor --json | tee "$RUNNER_TEMP/doctor.json" || true
           jq -e '.chezmoi_drift == [] and .brew.missing == [] and .uv_tools_missing == []
                  and .theme_mismatch == [] and .font_mismatch == []
-                 and .telemetry_on == [] and .claude_settings_in_sync' "$RUNNER_TEMP/doctor.json"
+                 and .telemetry_on == [] and .macos_defaults_mismatch == []
+                 and .claude_settings_in_sync' "$RUNNER_TEMP/doctor.json"
 
       - name: Optional Brewfiles reference real packages
-        # optional groups are off above, so at least check every name resolves
+        # groups are off above, so at least check every name resolves
         run: |
           eval "$(/opt/homebrew/bin/brew shellenv)"
           for f in Brewfile.*; do
             echo "== $f"
-            formulae=$(brew bundle list --file "$f" --formula)
-            casks=$(brew bundle list --file "$f" --cask)
+            formulae=$(brew bundle list --file "$f" --formula | xargs)
+            casks=$(brew bundle list --file "$f" --cask | xargs)
+            # shellcheck disable=SC2086 # split into one arg per package on purpose
             [ -z "$formulae" ] || brew info --json=v2 --formula $formulae >/dev/null
+            # shellcheck disable=SC2086
             [ -z "$casks" ] || brew info --json=v2 --cask $casks >/dev/null
           done
 
-      - name: shellcheck (rendered)
+      - name: Lint (same script as the pre-commit hook)
         run: |
           eval "$(/opt/homebrew/bin/brew shellenv)"
-          brew install shellcheck
-          for f in run_onchange_*.tmpl dot_claude/*.tmpl dot_local/bin/executable_* .githooks/pre-commit; do
-            shell=sh; head -1 "$f" | grep -q bash && shell=bash
-            echo "== $f ($shell)"
-            chezmoi execute-template --source "$GITHUB_WORKSPACE" < "$f" | shellcheck -s "$shell" -
-          done
+          .githooks/lint
 
       - name: Secret scan (gitleaks from the Brewfile)
         run: |
@@ -85,5 +81,5 @@ jobs:
           test -L ~/.gitconfig
           jq -e '.mcpServers["chrome-devtools"].args | index("--autoConnect")' ~/.claude.json >/dev/null
           test "$(git config --global --get merge.conflictStyle)" = zdiff3
-          # no signing key on the runner, so signing must stay off
+          # no signing key on the runner
           test -z "$(git config --global --includes --get commit.gpgSign)"

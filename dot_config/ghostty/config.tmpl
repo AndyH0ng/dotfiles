@@ -1,4 +1,3 @@
-# palette comes from .chezmoidata/theme.toml (standard base16 → ANSI mapping)
 {{- $p := .theme.palette }}
 palette = 0=#{{ $p.base00 }}
 palette = 1=#{{ $p.base08 }}
@@ -19,7 +18,6 @@ palette = 15=#{{ $p.base07 }}
 foreground = #{{ $p.base05 }}
 background = #{{ .theme.background }}
 
-# fonts come from .chezmoidata/theme.toml (fallback order)
 {{- range .theme.font.families }}
 font-family = {{ .name }}
 {{- end }}

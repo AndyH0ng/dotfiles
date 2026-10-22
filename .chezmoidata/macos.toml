@@ -1,0 +1,58 @@
+# `defaults write` type comes from the TOML value (bool/int/string).
+# restart: app to relaunch so the change applies
+
+# keyboard (takes effect after logout)
+[[macos.defaults]]
+domain = "NSGlobalDomain"
+key = "KeyRepeat"
+value = 2
+
+[[macos.defaults]]
+domain = "NSGlobalDomain"
+key = "InitialKeyRepeat"
+value = 15
+
+[[macos.defaults]]
+domain = "NSGlobalDomain"
+key = "ApplePressAndHoldEnabled"
+value = false
+
+# text substitution
+[[macos.defaults]]
+domain = "NSGlobalDomain"
+key = "NSAutomaticCapitalizationEnabled"
+value = false
+
+[[macos.defaults]]
+domain = "NSGlobalDomain"
+key = "NSAutomaticPeriodSubstitutionEnabled"
+value = false
+
+[[macos.defaults]]
+domain = "NSGlobalDomain"
+key = "NSAutomaticQuoteSubstitutionEnabled"
+value = false
+
+# finder
+[[macos.defaults]]
+domain = "com.apple.finder"
+key = "ShowPathbar"
+value = true
+restart = "Finder"
+
+[[macos.defaults]]
+domain = "com.apple.finder"
+key = "FXEnableExtensionChangeWarning"
+value = false
+restart = "Finder"
+
+# .DS_Store
+[[macos.defaults]]
+domain = "com.apple.desktopservices"
+key = "DSDontWriteNetworkStores"
+value = true
+
+[[macos.defaults]]
+domain = "com.apple.desktopservices"
+key = "DSDontWriteUSBStores"
+value = true

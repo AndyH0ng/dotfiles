@@ -1,7 +1,4 @@
-# Optional Brewfile groups — the single source for them. Each entry needs a
-# matching Brewfile.<name>. Everything else (the init prompt, the install
-# script, dotfiles-doctor, CI) loops over this list.
-# Descriptions must not contain commas (they become prompt text).
+# Each group needs a Brewfile.<name>. Descriptions become prompt text: no commas.
 
 [[groups]]
 name = "dev"

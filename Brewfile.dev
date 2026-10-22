@@ -1,4 +1,3 @@
-# Dev apps (opt-in group "dev", see .chezmoidata/packages.toml)
 cask "webstorm"
 cask "intellij-idea"
 cask "orbstack"

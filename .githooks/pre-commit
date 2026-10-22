@@ -1,7 +1,9 @@
 #!/bin/sh
-# Scan staged changes for secrets before every commit.
-if ! command -v gitleaks >/dev/null 2>&1; then
-  echo "pre-commit: gitleaks not installed — run 'brew install gitleaks'" >&2
-  exit 1
-fi
+for tool in gitleaks shellcheck actionlint zizmor chezmoi; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    echo "pre-commit: $tool not installed — run 'brew bundle --file ~/dotfiles/Brewfile'" >&2
+    exit 1
+  fi
+done
+"$(dirname "$0")/lint" || exit 1
 exec gitleaks git --pre-commit --staged --no-banner --redact

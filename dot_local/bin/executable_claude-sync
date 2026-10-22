@@ -1,9 +1,6 @@
 #!/bin/sh
-# Copy ~/.claude/settings.json back into the dotfiles repo, minus what the
-# modify_ script adds: the machine-local autoMode block and the telemetry env
-# from .chezmoidata/telemetry.toml. Run after changing settings via /config.
-#   claude-sync          write claude-settings.json
-#   claude-sync --check  exit 1 if the repo copy is out of date (used by doctor)
+# ~/.claude/settings.json → claude-settings.json, minus what modify_ adds (autoMode, telemetry env)
+#   claude-sync --check  exit 1 if the repo copy is out of date
 set -eu
 src=$(chezmoi source-path)
 telemetry_keys=$(chezmoi data --format json | jq -c '.telemetry.claude_env | keys')

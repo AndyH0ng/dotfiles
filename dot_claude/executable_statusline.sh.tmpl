@@ -1,5 +1,4 @@
 #!/bin/sh
-# Claude Code statusline — colors from .chezmoidata/theme.toml
 input=$(cat)
 
 model=$(echo "$input" | jq -r '.model.display_name // "?"' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
@@ -11,7 +10,7 @@ seven_d=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty
 dirname=$(basename "$dir")
 branch=$(git -C "$dir" branch --show-current 2>/dev/null)
 
-# palette from .chezmoidata/theme.toml — rgb() turns a hex color into a truecolor escape
+# hex → truecolor escape
 rgb() {
   h=$1; rest=${h#??}
   printf '\033[38;2;%d;%d;%dm' "0x${h%????}" "0x${rest%??}" "0x${h#????}"
@@ -28,7 +27,7 @@ reset='\033[0m'
 
 BAR_WIDTH=10
 
-# builds "label [bar] pct%" in $bar_out. $1=label $2=pct (numeric or empty)
+# "label [bar] pct%" into $bar_out
 render_bar() {
   label=$1
   pct=$2
@@ -64,7 +63,7 @@ if [ -n "$branch" ]; then
   line1="${line1} ${muted}on${reset} ${magenta}${branch}${reset}"
 fi
 
-# line 2: ctx / 5h / 7d — each segment only appears once its data exists
+# line 2: ctx / 5h / 7d, each only once its data exists
 line2=""
 if [ -n "$ctx_pct" ]; then
   render_bar ctx "$ctx_pct"

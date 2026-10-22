@@ -1,6 +1,3 @@
-# Non-template files in $HOME are symlinks into the repo, so editing
-# ~/.zshrc edits the repo directly — no `chezmoi re-add` needed.
-# Templates (theme-driven files) are still rendered copies.
 {{- /* .chezmoidata isn't loaded yet at init, so read the group list directly */}}
 {{- $groups := (include ".chezmoidata/packages.toml" | fromToml).groups }}
 {{- $install := dict }}

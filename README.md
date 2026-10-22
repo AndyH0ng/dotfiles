@@ -19,6 +19,7 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply AndyH0ng
 - **Python**: uv, ruff, [pyrefly](https://pyrefly.org)(타입 체커, [uv-tools.txt](uv-tools.txt)로 설치)
 - **Git**: 최신 기본값(histogram diff, zdiff3, rerere, autoSetupRemote), pager로 [delta](https://github.com/dandavison/delta) 사용(lazygit 포함), 서명 키가 있을 때만 SSH 커밋 서명
 - **Claude Code**: `settings.json`(플러그인, 테마, 상태바)과 base16-snazzy [상태바](dot_claude/executable_statusline.sh.tmpl), 실행 중인 Chrome Canary에 붙는 chrome-devtools MCP(`chrome://inspect/#remote-debugging`에서 원격 디버깅을 켜야 함)
+- **macOS 설정**: 키 반복, 텍스트 자동 치환 끄기, Finder 경로 막대, 네트워크·USB에 `.DS_Store` 안 만들기 등. 목록은 [`.chezmoidata/macos.toml`](.chezmoidata/macos.toml) 한 곳에 있다
 - **프라이버시**: Homebrew, gh, Claude Code, Codex, CodeRabbit, 주요 JS 도구의 텔레메트리 끔. 목록은 [`.chezmoidata/telemetry.toml`](.chezmoidata/telemetry.toml) 한 곳에 있다
 
 ## 수정하기
@@ -28,6 +29,8 @@ chezmoi는 심링크 모드로 동작한다. `~/.zshrc` 같은 일반 파일은 
 `.tmpl`로 끝나는 파일은 렌더링된 복사본이다. `chezmoi edit <대상>`이나 저장소에서 고친 뒤 `chezmoi apply`를 실행한다.
 
 - **테마**: `.chezmoidata/theme.toml`을 고치고 `chezmoi apply`.
+- **언어 런타임**: [`mise.lock`](dot_config/mise/mise.lock)이 `latest`/`lts`가 가리키는 정확한 버전과 체크섬을 고정하고, 설치는 `mise install --locked`로 한다. 나온 지 7일이 안 된 릴리스는 쓰지 않는다. 올릴 때는 `mise lock -g --bump && mise install` 후 `mise.lock`을 커밋한다.
+- **머신 전용 설정·비밀값**: `~/.zshrc.local`, `~/.zshenv.local`에 둔다(있으면 자동으로 source하며 git에는 들어가지 않는다). `~/.zshrc`는 공개 저장소로 연결된 심링크다.
 - **Claude Code 설정**: `~/.claude/settings.json`은 [`claude-settings.json`](claude-settings.json)으로부터 `modify_` 스크립트가 생성한다. 이 스크립트는 머신별 `autoMode` 블록을 git 밖에 둔다. `/config`로 설정을 바꿨다면 `claude-sync`로 저장소에 다시 반영한다.
 
 ## Chrome Canary 연결 (chrome-devtools MCP)
@@ -53,6 +56,6 @@ bunx chrome-devtools-mcp@latest --autoConnect --channel canary --no-usage-statis
 ## 유지보수
 
 - `dotfiles-doctor`(에이전트용은 `dotfiles-doctor --json`)는 어긋난 부분을 보여준다: 저장소와 다른 파일, 설치 안 된 패키지·uv 도구, 테마 팔레트 불일치, Claude 설정 불일치, 커밋·push 안 한 변경. 직접 설치했지만 Brewfile에 없는 패키지는 참고용으로만 표시한다.
-- pre-commit hook이 스테이징된 변경에 `gitleaks`를 돌린다. 설치 스크립트가 `core.hooksPath`로 켜 둔다.
-- CI는 새 macOS 러너에 전부 설치한 뒤 zsh 시작, `dotfiles-doctor`, 선택 Brewfile 패키지 이름, 셸 스크립트(shellcheck)를 검사한다. push할 때와 매주 실행된다.
+- pre-commit hook이 `.githooks/lint`(shellcheck, actionlint, zizmor — CI와 같은 검사)와 스테이징된 변경에 대한 `gitleaks`를 돌린다. 설치 스크립트가 `core.hooksPath`로 켜 둔다.
+- CI는 새 macOS 러너에 전부 설치한 뒤 zsh 시작, `dotfiles-doctor`, 선택 Brewfile 패키지 이름, `.githooks/lint`를 검사한다. push할 때와 매주 실행된다.
 - [AGENTS.md](AGENTS.md)(`CLAUDE.md`와 동일)에 AI 에이전트를 위한 저장소 규칙과 함정을 정리해 뒀다.

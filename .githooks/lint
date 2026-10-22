@@ -1,0 +1,20 @@
+#!/bin/sh
+# Shared by pre-commit and CI.
+set -u
+src=$(git rev-parse --show-toplevel)
+cd "$src" || exit 1
+status=0
+
+# templates are shellchecked after rendering
+for f in run_onchange_*.tmpl dot_claude/*.tmpl dot_local/bin/executable_* .githooks/*; do
+  head -1 "$f" | grep -q '^#!' || continue
+  shell="sh"
+  head -1 "$f" | grep -q bash && shell=bash
+  chezmoi execute-template --source "$src" <"$f" | shellcheck -s "$shell" - \
+    || { echo "lint: shellcheck failed: $f" >&2; status=1; }
+done
+
+actionlint || status=1
+zizmor --offline --quiet .github/workflows || status=1
+
+exit "$status"

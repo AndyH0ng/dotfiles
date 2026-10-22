@@ -1,5 +1,5 @@
 #!/bin/bash
-# Runs before files are written, so tools like jq exist for modify_ scripts.
+# before files are written, so jq exists for modify_ scripts
 # Brewfile hash: {{ include "Brewfile" | sha256sum }}
 {{- range .groups }}
 # Brewfile.{{ .name }} hash: {{ include (print "Brewfile." .name) | sha256sum }}
@@ -7,7 +7,7 @@
 # opt-ins: {{ .install | toJson }}
 set -euo pipefail
 
-# telemetry env for this script too (.zshenv isn't loaded here)
+# .zshenv isn't loaded here
 {{- range $k, $v := .telemetry.env }}
 export {{ $k }}={{ $v | quote }}
 {{- end }}
@@ -17,8 +17,7 @@ if ! command -v brew >/dev/null 2>&1; then
 fi
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# Homebrew only loads third-party formulae that are explicitly trusted.
-# Trust just tinty, not the whole tap.
+# trust the formula, not the whole tap
 brew tap tinted-theming/tinted
 brew trust --formula tinted-theming/tinted/tinty
 
@@ -29,28 +28,24 @@ brew bundle --no-upgrade --file="{{ $.chezmoi.sourceDir }}/Brewfile.{{ .name }}"
 {{-   end }}
 {{- end }}
 
-# Python CLIs that aren't in Homebrew (uv-tools.txt hash: {{ include "uv-tools.txt" | sha256sum }})
+# uv-tools.txt hash: {{ include "uv-tools.txt" | sha256sum }}
 grep -vE '^\s*(#|$)' "{{ .chezmoi.sourceDir }}/uv-tools.txt" | while read -r tool; do
   uv tool install "$tool"
 done
 
-# telemetry opt-outs stored in each tool's own config (.chezmoidata/telemetry.toml)
+# telemetry opt-outs
 {{- range .telemetry.commands }}
 if command -v {{ .tool }} >/dev/null 2>&1; then
   {{ .run }}
 fi
 {{- end }}
 
-# Claude Code MCP (runs before files are written: the first `claude`
-# invocation on a fresh Mac touches ~/.claude/settings.json, which chezmoi
-# then overwrites with the repo version). Attach to the already-running Chrome Canary (logged-in
-# profile) instead of launching a separate one. Needs remote debugging on in
-# chrome://inspect/#remote-debugging. Remove first so arg changes apply.
+# Claude Code MCP. Here, not the after-script: the first `claude` run on a fresh
+# Mac rewrites ~/.claude/settings.json. Remove first so arg changes apply.
 if command -v claude >/dev/null 2>&1; then
   claude mcp remove chrome-devtools -s user >/dev/null 2>&1 || true
   claude mcp add chrome-devtools -s user -- \
     bunx chrome-devtools-mcp@latest --autoConnect --channel canary --no-usage-statistics
 fi
 
-# block commits that contain secrets (this repo is public)
 git -C "{{ .chezmoi.sourceDir }}" config core.hooksPath .githooks

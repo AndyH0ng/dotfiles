@@ -1,9 +1,12 @@
-# Pinning policy: python is pinned exactly because venvs and uv lockfiles
-# break across minor versions; java is pinned to an LTS major; JS runtimes
-# track lts/latest on purpose.
+# python is pinned exactly: venvs and uv lockfiles break across minor versions.
+# "latest"/"lts" are frozen in mise.lock; bump with `mise lock -g --bump`.
 [tools]
 bun = "latest"
 java = "temurin-21"
 node = "lts"
 pnpm = "latest"
 python = "3.14.7"
+
+[settings]
+lockfile_platforms = ["macos-arm64"]
+minimum_release_age = "7d"

@@ -1,9 +1,10 @@
-# keep PATH entries unique (brew shellenv, path_helper and mise all prepend)
+# dedupe: brew shellenv, path_helper and mise all prepend
 typeset -U path PATH
 
-# uv tools and bun globals — here, not .zshrc, so non-interactive shells
-# (agents, scripts) see them too
+# here, not .zshrc, so non-interactive shells (agents, scripts) see them too
 export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"
 
-# telemetry opt-outs (generated from .chezmoidata/telemetry.toml)
 [[ -r ~/.config/zsh/telemetry.zsh ]] && source ~/.config/zsh/telemetry.zsh
+
+# machine-local (not in git)
+[[ -r ~/.zshenv.local ]] && source ~/.zshenv.local

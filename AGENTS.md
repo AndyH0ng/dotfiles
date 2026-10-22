@@ -16,14 +16,18 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 | `.chezmoi.toml.tmpl` | chezmoi config: symlink mode, one prompt per optional group |
 | `.chezmoidata/packages.toml` | **Only** place optional Brewfile groups are defined |
 | `.chezmoidata/telemetry.toml` | **Only** place telemetry opt-outs are defined (env vars, Claude env, per-tool commands + checks) |
+| `.chezmoidata/macos.toml` | **Only** place macOS `defaults` are defined |
 | `Brewfile` | Everything the dotfiles depend on |
 | `Brewfile.<group>` | One file per optional group (opt-in, stored as `.install.<group>`). Keep them to essentials only. |
 | `uv-tools.txt` | Python CLIs installed with `uv tool install` (e.g. pyrefly) |
 | `run_onchange_before_install-packages.sh.tmpl` | brew bundle, tap trust, uv tools, gh/codex telemetry, Claude Code MCP servers, git hooks path |
-| `run_onchange_after_setup.sh.tmpl` | `mise install`, tinty theme |
+| `run_onchange_after_macos-defaults.sh.tmpl` | `defaults write` for each entry in `macos.toml`, then relaunches apps |
+| `run_onchange_after_setup.sh.tmpl` | `mise install --locked`, tinty theme |
+| `dot_config/mise/mise.lock` | Exact runtime versions + checksums that `latest`/`lts` resolve to |
 | `claude-settings.json` | Source for `~/.claude/settings.json` (see below) |
 | `dot_local/bin/` | `claude-sync`, `dotfiles-doctor` |
-| `.githooks/pre-commit` | gitleaks on staged changes |
+| `.githooks/lint` | shellcheck (rendered scripts), actionlint, zizmor. Run by pre-commit **and** CI |
+| `.githooks/pre-commit` | `.githooks/lint`, then gitleaks on staged changes |
 | `.github/workflows/test.yml` | Fresh-macOS install test, weekly + on push |
 
 ## How edits flow
@@ -35,6 +39,8 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 - **Fonts.** Terminal fonts live in `theme.font` in `theme.toml`, and Ghostty is rendered from it. Changing a font means editing `theme.font.families` **and** its `cask` in `Brewfile`. `dotfiles-doctor` fails if they disagree or Ghostty can't find the family name, because Ghostty otherwise silently falls back to a default font.
 - **Claude Code settings.** `dot_claude/modify_settings.json.tmpl` builds `~/.claude/settings.json` from `claude-settings.json`, adds `telemetry.claude_env`, and keeps the machine's local `autoMode` block, which holds private repo names and never goes in git. `claude-sync` does the reverse and strips both. After changing settings via `/config`, run `claude-sync`. Never add telemetry keys to `claude-settings.json` directly.
 - **Machine-specific values** go in templates gated by `stat` or data (see `dot_config/git/local.tmpl`, where commit signing is only enabled if the key exists). Never hardcode `/Users/<name>`. Use `$HOME`, `~`, or `{{ .chezmoi.homeDir }}`.
+- **Machine-local shell config and secrets** go in `~/.zshrc.local` / `~/.zshenv.local` (sourced if present, never in git), not in `dot_zshrc`. Installers that append lines to `~/.zprofile` etc. are editing the repo through the symlink, so move those lines there too.
+- **Runtime versions.** `mise.lock` freezes what `latest`/`lts` mean, and the after-script installs with `--locked`, so every Mac gets the same versions. `minimum_release_age = "7d"` keeps brand-new releases out. To move forward: `mise lock -g --bump && mise install`, then commit `mise.lock`. After adding a tool to `config.toml`, run `mise lock -g` or `--locked` fails. `~/.config/mise/mise.lock` is a symlink and mise writes through it, so it stays in sync.
 
 ## Adding things
 
@@ -49,14 +55,15 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
   - Some formulae aren't binaries (e.g. `antidote` is a sourced zsh script). Don't check them with `command -v`.
 - **A shell shortcut:** if it shadows a standard command (`ls`, `cat`, `grep`, `find`), use `zsh-abbr` in `dot_zshrc`, not `alias`, so agents and pasted commands still get the real tool. New names (`ll`, `la`) can be plain aliases. Shadowing an existing command needs `abbr -S -q -f … >/dev/null` (without `-f` it silently refuses).
 - **Telemetry opt-outs:** add them to `.chezmoidata/telemetry.toml` only. Use `env` for env vars, `claude_env` for Claude Code, and `commands` (`tool`/`run`/`check`) for settings stored in a tool's own config. `dotfiles-doctor` verifies all three.
+- **A macOS setting:** add a `[[macos.defaults]]` entry to `.chezmoidata/macos.toml` (`domain`, `key`, `value`, optional `restart`). The `defaults` type comes from the TOML value, so write `false`, not `0`. Find the key by diffing `defaults read <domain>` before and after toggling it in System Settings. `dotfiles-doctor` reads each one back. Nothing that needs `sudo` (CI and unattended applies can't answer a password prompt).
 - **An env var for every shell** (PATH etc.): `dot_zshenv`. Agents run non-interactive shells, so PATH set in `.zshrc` is invisible to them. Login-shell-only setup: `dot_zprofile`. Interactive-only: `dot_zshrc`.
 
 ## Before committing
 
 1. `chezmoi apply` (or `chezmoi diff` for a dry run).
 2. Run `dotfiles-doctor --json` and expect `"ok": true` once committed and pushed. Each failing field has a hint in `fixes`. `brew.unlisted` is informational, listing packages the user installed by hand, so never add them to a Brewfile unless asked.
-3. Commit. The pre-commit hook runs gitleaks, and you shouldn't bypass it.
-4. Push. Don't block on CI (the macOS run takes 2–5 min), so check `gh run list -L1` later. CI installs from scratch with every optional group off, requires `dotfiles-doctor` to be clean, resolves every name in the optional Brewfiles, and shellchecks all rendered scripts. A red CI means a new Mac would break.
+3. Commit. The pre-commit hook runs `.githooks/lint` (the same checks as CI) and gitleaks, and you shouldn't bypass it. When adding a lint, put it in `.githooks/lint` so both stay in step.
+4. Push. Don't block on CI (the macOS run takes 2–5 min), so check `gh run list -L1` later. CI installs from scratch with every optional group off, requires `dotfiles-doctor` to be clean, resolves every name in the optional Brewfiles, and runs `.githooks/lint`. A red CI means a new Mac would break.
 
 Note: `claude-code@latest` and `chrome-devtools-mcp@latest` float on purpose, so a weekly CI failure may come from a new upstream release rather than a change here.
 
@@ -66,4 +73,4 @@ Note: `claude-code@latest` and `chrome-devtools-mcp@latest` float on purpose, so
 - Don't edit rendered template output in `$HOME`.
 - Don't run `claude …` commands in the after-script: on a fresh Mac the first run rewrites `~/.claude/settings.json` and leaves drift. Put them in the before-script.
 - Don't add aliases that shadow POSIX tools.
-- Don't pin third-party GitHub Actions by tag only. Prefer first-party actions or run the tool directly.
+- Don't pin GitHub Actions by tag. Pin by commit SHA with the tag in a comment (zizmor enforces this), and prefer first-party actions or running the tool directly.

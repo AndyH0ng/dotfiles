@@ -1,0 +1,15 @@
+#!/bin/bash
+# from .chezmoidata/macos.toml
+set -euo pipefail
+{{ range .macos.defaults }}
+{{- $kind := kindOf .value }}
+defaults write {{ .domain }} {{ .key }} {{ if eq $kind "bool" }}-bool {{ .value }}{{ else if eq $kind "string" }}-string {{ .value | quote }}{{ else if eq $kind "float64" }}-float {{ .value }}{{ else }}-int {{ .value }}{{ end }}
+{{- end }}
+{{- $restart := list }}
+{{- range .macos.defaults }}{{ if hasKey . "restart" }}{{ $restart = append $restart .restart }}{{ end }}{{ end }}
+
+
+# || true: may not be running (CI)
+{{- range $restart | uniq }}
+killall {{ . }} 2>/dev/null || true
+{{- end }}

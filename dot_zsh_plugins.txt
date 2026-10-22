@@ -1,8 +1,5 @@
-# antidote plugin list — one repo per line
-# order matters: fzf-tab must load after compinit (handled in .zshrc) but
-# before widget-wrapping plugins. syntax highlighting is handled separately
-# by zsh-patina (brew, activated at the end of .zshrc), not antidote.
-
+# fzf-tab must come before widget-wrapping plugins. Syntax highlighting is
+# zsh-patina (end of .zshrc), not a plugin here.
 Aloxaf/fzf-tab
 zsh-users/zsh-autosuggestions
 zsh-users/zsh-completions

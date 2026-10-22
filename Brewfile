@@ -1,6 +1,3 @@
-# Everything the dotfiles in this repo depend on. Optional groups live in
-# Brewfile.dev / Brewfile.apps / Brewfile.fonts (each opt-in on chezmoi init).
-
 tap "tinted-theming/tinted"
 
 # shell
@@ -11,7 +8,7 @@ brew "vivid"
 brew "tinted-theming/tinted/tinty"
 brew "fastfetch"
 
-# tools referenced in .zshrc
+# cli
 brew "mise"
 brew "zoxide"
 brew "fzf"
@@ -22,14 +19,19 @@ brew "ripgrep"
 brew "fd"
 brew "git-delta"
 brew "git"
-brew "gh"              # git credential helper in .gitconfig
+brew "gh"
 brew "lazygit"
 brew "chezmoi"
 brew "uv"
 brew "ruff"
 brew "jq"
 brew "xh"
+
+# repo checks (.githooks)
 brew "gitleaks"
+brew "shellcheck"
+brew "actionlint"
+brew "zizmor"
 
 # terminal + fonts
 cask "ghostty"

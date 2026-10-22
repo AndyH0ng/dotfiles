@@ -1,5 +1,4 @@
-# overrides on top of the built-in "patina" theme — colors are ANSI names,
-# not hex, so they follow whatever palette tinty currently has applied
+# ANSI names, not hex, so they follow tinty's palette
 "dynamic.callable" = "green"
 "dynamic.callable.alias" = "green"
 "dynamic.callable.builtin" = "green"
