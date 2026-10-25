@@ -1,0 +1,4 @@
+# Shared transport definition; clients keep their own authentication and state.
+[mcp.chrome_devtools]
+command = "bunx"
+args = ["chrome-devtools-mcp@latest", "--autoConnect", "--channel", "canary", "--no-usage-statistics"]

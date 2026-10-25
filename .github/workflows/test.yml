@@ -16,6 +16,12 @@ jobs:
   install:
     runs-on: macos-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        agent: [claude, codex]
+    env:
+      AGENT: ${{ matrix.agent }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
@@ -25,11 +31,11 @@ jobs:
       - name: Install chezmoi
         run: brew install chezmoi
 
-      - name: Turn on the claude group
+      - name: Turn on one agent group
         # promptBoolOnce keeps an existing answer; --promptDefaults turns the rest off
         run: |
           mkdir -p ~/.config/chezmoi
-          printf '[data.install]\nclaude = true\n' > ~/.config/chezmoi/chezmoi.toml
+          printf '[data.install]\n%s = true\n' "$AGENT" > ~/.config/chezmoi/chezmoi.toml
 
       - name: chezmoi init --apply
         run: chezmoi init --apply --no-tty --promptDefaults --source "$GITHUB_WORKSPACE"
@@ -50,7 +56,9 @@ jobs:
           jq -e '.chezmoi_drift == [] and .dangling_symlinks == [] and .brew.missing == [] and .uv_tools_missing == []
                  and .theme_mismatch == [] and .font_mismatch == []
                  and .telemetry_on == [] and .macos_defaults_mismatch == []
-                 and .claude_settings_in_sync and .claude_mcp_missing == []' "$RUNNER_TEMP/doctor.json"
+                 and .claude_settings_in_sync and .claude_mcp_missing == []
+                 and .codex_settings_in_sync and .codex_missing == []
+                 and .shell_tools_missing == []' "$RUNNER_TEMP/doctor.json"
 
       - name: Optional Brewfiles reference real packages
         # groups are off above, so at least check every name resolves
@@ -80,9 +88,17 @@ jobs:
         run: |
           test -L ~/.zshrc
           test -f ~/.config/ghostty/config && ! grep -q '{{' ~/.config/ghostty/config
-          test -x ~/.claude/statusline.sh
-          echo '{"model":{"display_name":"x"},"workspace":{"current_dir":"/tmp"}}' | ~/.claude/statusline.sh
-          jq -e '.statusLine' ~/.claude/settings.json >/dev/null
+          if [ "$AGENT" = claude ]; then
+            test -x ~/.claude/statusline.sh
+            echo '{"model":{"display_name":"x"},"workspace":{"current_dir":"/tmp"}}' | ~/.claude/statusline.sh
+            jq -e '.statusLine' ~/.claude/settings.json >/dev/null
+          else
+            codex --version
+            uv run --script scripts/codex_config.py --check --file ~/.codex/config.toml
+            test -f ~/.codex/AGENTS.md
+            test ! -L ~/.codex/config.toml
+          fi
+          test -x ~/.local/agent-bin/rm
           test -L ~/.gitconfig
           test "$(git config --global --get merge.conflictStyle)" = zdiff3
           # no signing key on the runner

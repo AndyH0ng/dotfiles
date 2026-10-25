@@ -6,15 +6,18 @@ cd "$src" || exit 1
 status=0
 
 # templates are shellchecked after rendering
-for f in run_*.tmpl dot_claude/*.tmpl dot_local/bin/executable_* .githooks/*; do
+for f in run_*.tmpl dot_claude/*.tmpl private_dot_codex/*.tmpl dot_local/bin/executable_* .githooks/*; do
   head -1 "$f" | grep -q '^#!' || continue
   shell="sh"
   head -1 "$f" | grep -q bash && shell=bash
   chezmoi execute-template --source "$src" <"$f" | shellcheck -s "$shell" - \
     || { echo "lint: shellcheck failed: $f" >&2; status=1; }
 done
+zsh -n dot_zshenv dot_zprofile dot_zshrc dot_local/agent-bin/executable_rm || status=1
 
 actionlint || status=1
 zizmor --offline --quiet .github/workflows || status=1
+ruff check scripts || status=1
+uv run --script scripts/test_agents.py || status=1
 
 exit "$status"

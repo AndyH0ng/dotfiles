@@ -1,0 +1,9 @@
+#!/bin/sh
+# Merge owned keys; never copy private Codex state back into the public repo.
+set -eu
+settings=$(mktemp)
+trap 'rm -f "$settings"' EXIT
+cat >"$settings" <<'DOTFILES_CODEX_DATA'
+{{ dict "codex" .codex "install" .install "mcp" .mcp "telemetry" (dict "codex" .telemetry.codex) | toJson }}
+DOTFILES_CODEX_DATA
+/opt/homebrew/bin/uv run --script {{ joinPath .chezmoi.sourceDir "scripts/codex_config.py" | quote }} --data-file "$settings"

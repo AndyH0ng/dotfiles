@@ -6,6 +6,10 @@ name = "claude"
 description = "Claude Code with its settings/statusline/agent rm to Trash/sleep guard"
 
 [[groups]]
+name = "codex"
+description = "Codex CLI with managed settings/agent rm to Trash/sleep guard"
+
+[[groups]]
 name = "ide"
 description = "WebStorm/IntelliJ and code files opening in WebStorm"
 
@@ -15,7 +19,7 @@ description = "OrbStack"
 
 [[groups]]
 name = "canary"
-description = "Chrome Canary and the chrome-devtools MCP for Claude Code"
+description = "Chrome Canary and the chrome-devtools MCP for Claude Code/Codex"
 
 [[groups]]
 name = "apps"

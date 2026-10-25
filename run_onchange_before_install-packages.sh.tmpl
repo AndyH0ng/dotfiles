@@ -5,7 +5,10 @@
 # Brewfile.{{ .name }} hash: {{ include (print "Brewfile." .name) | sha256sum }}
 {{- end }}
 # opt-ins: {{ .install | toJson }}
+# Codex config helper: {{ include "scripts/codex_config.py" | sha256sum }}
+# MCP transport: {{ .mcp | toJson }}
 set -euo pipefail
+export DOTFILES_SOURCE_DIR={{ .chezmoi.sourceDir | quote }}
 
 # .zshenv isn't loaded here
 {{- range $k, $v := .telemetry.env }}
@@ -45,7 +48,7 @@ fi
 if command -v claude >/dev/null 2>&1; then
   claude mcp remove chrome-devtools -s user >/dev/null 2>&1 || true
   claude mcp add chrome-devtools -s user -- \
-    bunx chrome-devtools-mcp@latest --autoConnect --channel canary --no-usage-statistics
+    {{ .mcp.chrome_devtools.command | quote }}{{ range .mcp.chrome_devtools.args }} {{ . | quote }}{{ end }}
 fi
 {{- end }}
 

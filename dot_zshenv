@@ -2,8 +2,8 @@
 typeset -U path PATH
 
 # here, not .zshrc, so non-interactive shells (agents, scripts) see them too
-export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"
-[[ -n $CLAUDECODE ]] && path=(~/.local/agent-bin $path)
+path=(~/.local/bin ~/.local/share/mise/shims ~/.bun/bin /opt/homebrew/bin /opt/homebrew/sbin $path)
+[[ -n $CLAUDECODE || $DOTFILES_AGENT == codex ]] && path=(~/.local/agent-bin $path)
 
 [[ -r ~/.config/zsh/telemetry.zsh ]] && source ~/.config/zsh/telemetry.zsh
 

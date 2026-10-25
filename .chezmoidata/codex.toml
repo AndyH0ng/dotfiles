@@ -1,0 +1,11 @@
+# Only these keys are managed. Models, trust, plugins and personal MCPs stay local.
+[codex.features]
+prevent_idle_sleep = true
+
+[codex.shell_environment_policy.set]
+DOTFILES_AGENT = "codex"
+
+# The agent rm must be able to move workspace files to the user's Trash.
+# The merger expands ~ and keeps any additional local writable roots.
+[codex.sandbox_workspace_write]
+writable_roots = ["~/.Trash"]

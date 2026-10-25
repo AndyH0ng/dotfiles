@@ -1,6 +1,7 @@
 eval "$(/opt/homebrew/bin/brew shellenv zsh)"
-# again: login shells run path_helper after .zshenv, which moves /bin ahead
-[[ -n $CLAUDECODE ]] && path=(~/.local/agent-bin $path)
-
 # OrbStack
 source ~/.orbstack/shell/init.zsh 2>/dev/null || :
+
+# Login setup reorders PATH; keep locked runtimes and agent commands first.
+path=(~/.local/bin ~/.local/share/mise/shims ~/.bun/bin $path)
+[[ -n $CLAUDECODE || $DOTFILES_AGENT == codex ]] && path=(~/.local/agent-bin $path)

@@ -1,0 +1,13 @@
+# Shared global guidance. Tool-specific settings live in their client data files.
+[agents]
+instructions = """
+# Personal working preferences
+
+- Explain results in Korean unless the task calls for another language.
+- Read the project's AGENTS.md and follow its build and verification commands.
+- Prefer rg for searches and apply_patch for source edits when available.
+- Check git status before editing and preserve unrelated changes.
+- Shell tools come from Homebrew and mise. Check PATH before assuming a tool is missing.
+- Agent shells use a Trash-backed rm. Explicit /bin/rm bypasses it.
+- Keep authentication, project trust and machine-specific settings out of public dotfiles.
+"""

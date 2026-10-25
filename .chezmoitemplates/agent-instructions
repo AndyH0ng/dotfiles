@@ -1,0 +1,32 @@
+# Preserve personal instructions outside the managed block.
+set -eu
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+cat >"$tmp/current"
+cat >"$tmp/body" <<'DOTFILES_AGENT_INSTRUCTIONS'
+{{ .agents.instructions | trimSuffix "\n" }}
+DOTFILES_AGENT_INSTRUCTIONS
+
+# Migrate the unmarked initial defaults without duplicating them.
+if cmp -s "$tmp/current" "$tmp/body"; then
+  : >"$tmp/current"
+fi
+if ! awk '
+  $0 == "<!-- dotfiles:agent-instructions:start -->" {
+    if (inside || seen) exit 1
+    inside=1; seen=1; next
+  }
+  $0 == "<!-- dotfiles:agent-instructions:end -->" {
+    if (!inside) exit 1
+    inside=0; next
+  }
+  !inside { print }
+  END { if (inside) exit 1 }
+' "$tmp/current" >"$tmp/local"; then
+  echo "agent instructions: malformed managed block; leaving file unchanged" >&2
+  exit 1
+fi
+cat "$tmp/local"
+printf '%s\n' '<!-- dotfiles:agent-instructions:start -->'
+cat "$tmp/body"
+printf '%s\n' '<!-- dotfiles:agent-instructions:end -->'

@@ -1,5 +1,5 @@
 #!/bin/sh
-for tool in gitleaks shellcheck actionlint zizmor chezmoi; do
+for tool in gitleaks shellcheck actionlint zizmor chezmoi ruff uv; do
   if ! command -v "$tool" >/dev/null 2>&1; then
     echo "pre-commit: $tool not installed — run 'brew bundle --file ~/dotfiles/Brewfile'" >&2
     exit 1

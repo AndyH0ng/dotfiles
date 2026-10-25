@@ -8,6 +8,7 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # --locked: install exactly what mise.lock pins, never re-resolve latest/lts
 cd "$HOME" && mise install --yes --locked
+mise reshim
 
 tinty install
 tinty apply {{ .theme.scheme | quote }}

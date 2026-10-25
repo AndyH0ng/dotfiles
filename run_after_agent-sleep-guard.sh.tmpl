@@ -1,5 +1,5 @@
 #!/bin/bash
-# Runs on every apply: installs with the claude group, removes without it, and
+# Runs on every apply: installs with either agent group, removes without both, and
 # changes nothing once done. Root files prompt for sudo only when they need to
 # change. CI has no login session.
 set -euo pipefail
@@ -10,7 +10,7 @@ guard="$HOME/.local/bin/agent-sleep-guard"
 sudoers=/etc/sudoers.d/agent-sleep-guard
 daemon=/Library/LaunchDaemons/$label-reset.plist
 agent="$HOME/Library/LaunchAgents/$label.plist"
-{{- if index .install "claude" }}
+{{- if or (index .install "claude") (index .install "codex") }}
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
