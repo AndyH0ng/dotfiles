@@ -19,6 +19,8 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply --source ~/dotfiles AndyH0n
 - [Brewfile.apps](Brewfile.apps): AdGuard, Notion, LaunchOS, Figma
 - [Brewfile.fonts](Brewfile.fonts): Pretendard, SF
 
+Git 이름과 이메일은 최초 `chezmoi init`에서 입력한다. 기존 Git 설정이 있으면 기본값으로 제안하며, 입력값은 이 Mac의 chezmoi 설정에만 저장한다.
+
 ## 구성
 
 - **쉘**: zsh + [antidote](https://github.com/mattmc3/antidote) 플러그인(fzf-tab, autosuggestions, completions, zsh-abbr), [starship](https://starship.rs) 프롬프트, [zsh-patina](https://github.com/michel-kraemer/zsh-patina) 구문 강조

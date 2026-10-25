@@ -152,6 +152,29 @@ class AgentIntegrationTests(unittest.TestCase):
         self.assertTrue(actual["claude"])
         self.assertTrue(actual["apps"])
 
+    def test_git_identity_defaults_and_saved_answers(self):
+        global_config = self.temp / "gitconfig"
+        global_config.write_text('[user]\nname = Test User\nemail = test@example.invalid\n')
+        env = {**os.environ, "GIT_CONFIG_GLOBAL": str(global_config)}
+        command = self.base + ["init", "--promptDefaults", "--no-tty"]
+        subprocess.run(command, env=env, check=True, capture_output=True, text=True)
+        identity = tomllib.loads(self.config.read_text())["data"]["git"]
+        self.assertEqual(identity, {"name": "Test User", "email": "test@example.invalid"})
+        rendered = subprocess.check_output(
+            self.base + ["execute-template", "--file", str(ROOT / "dot_config/git/local.tmpl")],
+            text=True,
+        )
+        target = self.temp / "rendered-gitconfig"
+        target.write_text(rendered)
+        for key, value in identity.items():
+            self.assertEqual(subprocess.check_output(
+                ["git", "config", "--file", str(target), "--get", f"user.{key}"],
+                text=True,
+            ).strip(), value)
+        global_config.write_text('[user]\nname = Other User\nemail = other@example.invalid\n')
+        subprocess.run(command, env=env, check=True, capture_output=True, text=True)
+        self.assertEqual(tomllib.loads(self.config.read_text())["data"]["git"], identity)
+
     def test_telemetry_command_never_reenters_chezmoi(self):
         mock_bin = self.temp / "bin"
         mock_bin.mkdir()

@@ -58,6 +58,8 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 
 ## Adding things
 
+- **Git identity.** Init prompts once for `data.git.name` and `data.git.email`, defaulting to the existing global Git config including its includes. Keep these values in local chezmoi config; `dot_config/git/local.tmpl` renders them alongside conditional signing settings. Never put a personal identity in `dot_gitconfig`.
+
 - **Removing or renaming a config file:** add the old target (relative to `$HOME`) to `.chezmoiremove`, or `$HOME` keeps a dangling symlink into the repo. `dotfiles-doctor` reports those as `dangling_symlinks`.
 - **A newer chezmoi feature:** bump `.chezmoiversion` to the release that added it.
 - **An empty file** (e.g. `~/.hushlogin`): chezmoi skips empty sources unless they're named `empty_dot_…`.

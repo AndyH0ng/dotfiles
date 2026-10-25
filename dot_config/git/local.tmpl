@@ -1,3 +1,14 @@
+# Identity is stored in the machine's private chezmoi data.
+{{- $git := index . "git" | default dict }}
+{{- if or (index $git "name") (index $git "email") }}
+[user]
+{{- if index $git "name" }}
+	name = {{ index $git "name" | quote }}
+{{- end }}
+{{- if index $git "email" }}
+	email = {{ index $git "email" | quote }}
+{{- end }}
+{{- end }}
 # signing only on machines that have the key
 {{- $key := joinPath .chezmoi.homeDir ".ssh/id_ed25519_signing.pub" }}
 {{- if stat $key }}

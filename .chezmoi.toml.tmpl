@@ -4,8 +4,14 @@
 {{- range $groups }}
 {{-   $_ := set $install .name (promptBoolOnce $ (list "install" .name) (printf "Install Brewfile.%s (%s)" .name .description) false) }}
 {{- end }}
+{{- $gitName := promptStringOnce . (list "git" "name") "Git user name" (output "git" "config" "--global" "--includes" "--get" "--default" "" "user.name" | trim) }}
+{{- $gitEmail := promptStringOnce . (list "git" "email") "Git user email" (output "git" "config" "--global" "--includes" "--get" "--default" "" "user.email" | trim) }}
 sourceDir = {{ .chezmoi.sourceDir | quote }}
 mode = "symlink"
+
+[data.git]
+name = {{ $gitName | quote }}
+email = {{ $gitEmail | quote }}
 
 [data.install]
 {{- range $name, $on := $install }}

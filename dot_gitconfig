@@ -1,10 +1,6 @@
 # symlink into the repo: `git config --global` edits it directly.
 # Machine-specific bits go in ~/.config/git/local.
 
-[user]
-	name = Andy Hong
-	email = red@soongsil.ac.kr
-
 [include]
 	path = ~/.config/git/local
 
