@@ -1,4 +1,4 @@
-# Each group needs a Brewfile.<name>. Descriptions become prompt text: no commas.
+# Each group needs a packages/Brewfile.<name>. Descriptions become prompt text: no commas.
 # A group can also gate config: .chezmoiignore, scripts and dotfiles-doctor read it with (index .install "<name>").
 
 [[groups]]

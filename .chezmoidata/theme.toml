@@ -24,7 +24,7 @@ base0E = "ff6ac1"
 base0F = "b2643c"
 
 # Fallback order. `name` must match `ghostty +list-fonts` exactly, and each
-# cask must also be in Brewfile (it can't be templated).
+# cask must also be in packages/Brewfile (it can't be templated).
 [theme.font]
 size = 14
 

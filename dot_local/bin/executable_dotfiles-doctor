@@ -11,13 +11,13 @@ dangling=$(chezmoi managed -i files -p absolute | sed 's|/[^/]*$||' | sort -u \
 
 # brew
 data=$(chezmoi data --format json)
-active="$src/Brewfile"
+active="$src/packages/Brewfile"
 for g in $(printf '%s' "$data" | jq -r '.install as $on | .groups[] | select($on[.name] == true) | .name'); do
-  active="$active $src/Brewfile.$g"
+  active="$active $src/packages/Brewfile.$g"
 done
 all_brewfile=$(mktemp); active_brewfile=$(mktemp)
 trap 'rm -f "$all_brewfile" "$active_brewfile"' EXIT
-cat "$src"/Brewfile "$src"/Brewfile.* > "$all_brewfile"
+cat "$src"/packages/Brewfile "$src"/packages/Brewfile.* > "$all_brewfile"
 # shellcheck disable=SC2086
 cat $active > "$active_brewfile"
 
@@ -51,7 +51,7 @@ ghostty_bin=$(command -v ghostty || echo /Applications/Ghostty.app/Contents/MacO
 ghostty_fonts=$("$ghostty_bin" +list-fonts 2>/dev/null)
 font_mismatch=$(printf '%s' "$data" | jq -r '.theme.font.families[] | "\(.cask)\t\(.name)"' \
   | while IFS="$(printf '\t')" read -r cask name; do
-      grep -q "^cask \"$cask\"" "$src/Brewfile" || echo "$cask (for \"$name\") is not in Brewfile"
+      grep -q "^cask \"$cask\"" "$src/packages/Brewfile" || echo "$cask (for \"$name\") is not in packages/Brewfile"
       if [ -n "$ghostty_fonts" ]; then
         printf '%s\n' "$ghostty_fonts" | grep -qx "$name" || echo "Ghostty can't find font family \"$name\""
       fi
@@ -166,17 +166,17 @@ if [ "${1:-}" = "--json" ]; then
       fixes: {
         chezmoi_drift: "chezmoi diff, then chezmoi apply (repo wins) or edit the repo",
         dangling_symlinks: "add each path (relative to $HOME) to .chezmoiremove, then chezmoi apply",
-        brew_missing: ("brew bundle --no-upgrade --file " + $src + "/Brewfile and each enabled Brewfile.<group>; run_onchange does not rerun on package removal"),
-        brew_unlisted: "informational only: packages you installed by hand. Do not add them to a Brewfile unless the user asks",
+        brew_missing: ("brew bundle --no-upgrade --file " + $src + "/packages/Brewfile and each enabled packages/Brewfile.<group>; run_onchange does not rerun on package removal"),
+        brew_unlisted: "informational only: packages you installed by hand. Do not add them to a packages/Brewfile unless the user asks",
         uv_tools_missing: "chezmoi apply (or uv tool install <name>)",
         theme_mismatch: "copy the palette for theme.scheme from the tinty scheme yaml into .chezmoidata/theme.toml",
-        font_mismatch: "every theme.font.families cask must be in Brewfile and its name must match `ghostty +list-fonts` exactly",
+        font_mismatch: "every theme.font.families cask must be in packages/Brewfile and its name must match `ghostty +list-fonts` exactly",
         telemetry_on: "run the matching telemetry.commands[].run from .chezmoidata/telemetry.toml; run_onchange may already be recorded",
         macos_defaults_mismatch: "chezmoi apply, or change the value in .chezmoidata/macos.toml. A key that never sticks was likely dropped by a macOS update; a default app that reverts was changed in Finder (Get Info → Open with)",
         claude_settings: "claude-sync",
         claude_mcp_missing: "run the `claude mcp add` line from run_onchange_before_install-packages.sh.tmpl (run_onchange, so chezmoi apply alone does not rerun it)",
         codex_settings: "chezmoi apply ~/.codex/config.toml (merges owned settings and Canary MCP; preserves personal settings)",
-        codex_missing: ("brew bundle --no-upgrade --file " + $src + "/Brewfile.codex"),
+        codex_missing: ("brew bundle --no-upgrade --file " + $src + "/packages/Brewfile.codex"),
         shell_tools_missing: "chezmoi apply ~/.zshenv ~/.zprofile; mise install --locked; mise reshim",
         git_behind: "chezmoi update"
       }}'
@@ -189,7 +189,7 @@ else
   section "Brewfiles: installed but not listed (informational)"; show "$(printf '%s' "$brew_unlisted" | tr '\n' ' ')"
   section "uv tools: listed but not installed"; show "$uv_missing"
   section "theme.toml palette vs tinty scheme"; show "$theme_mismatch"
-  section "terminal fonts (theme.toml vs Brewfile and Ghostty)"; show "$font_mismatch"
+  section "terminal fonts (theme.toml vs packages/Brewfile and Ghostty)"; show "$font_mismatch"
   section "telemetry (.chezmoidata/telemetry.toml)"
   if [ -n "$telemetry_off" ]; then show "$telemetry_off"; else echo "  all off"; fi
   section "macOS defaults (.chezmoidata/macos.toml)"; show "$macos_mismatch"

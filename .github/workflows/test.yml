@@ -64,7 +64,7 @@ jobs:
         # groups are off above, so at least check every name resolves
         run: |
           eval "$(/opt/homebrew/bin/brew shellenv)"
-          for f in Brewfile.*; do
+          for f in packages/Brewfile.*; do
             echo "== $f"
             formulae=$(brew bundle list --file "$f" --formula | xargs)
             casks=$(brew bundle list --file "$f" --cask | xargs)
@@ -79,7 +79,7 @@ jobs:
           eval "$(/opt/homebrew/bin/brew shellenv)"
           .githooks/lint
 
-      - name: Secret scan (gitleaks from the Brewfile)
+      - name: Secret scan (gitleaks from the packages/Brewfile)
         run: |
           eval "$(/opt/homebrew/bin/brew shellenv)"
           gitleaks git "$GITHUB_WORKSPACE" --no-banner --redact

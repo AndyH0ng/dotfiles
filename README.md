@@ -9,15 +9,15 @@ xcode-select --install   # 먼저: 새 Mac의 git은 Command Line Tools 설치 �
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply --source ~/dotfiles AndyH0ng
 ```
 
-필요하면 Homebrew를 설치하고, [Brewfile](Brewfile)로 `brew bundle`을 실행한 뒤 tinty 테마를 적용한다. `chezmoi init` 때 선택 그룹마다 설치 여부를 한 번씩 묻는다. 그룹을 켜면 앱과 그에 딸린 설정이 같이 들어간다.
+필요하면 Homebrew를 설치하고, [packages/Brewfile](packages/Brewfile)로 `brew bundle`을 실행한 뒤 tinty 테마를 적용한다. `chezmoi init` 때 선택 그룹마다 설치 여부를 한 번씩 묻는다. 그룹을 켜면 앱과 그에 딸린 설정이 같이 들어간다.
 
-- [Brewfile.claude](Brewfile.claude): Claude Code와 설정·상태바, 에이전트 `rm` → 휴지통, 작업 중 잠자기 방지
-- [Brewfile.codex](Brewfile.codex): Codex CLI와 설정·전역 지침, 에이전트 `rm` → 휴지통, 작업 중 잠자기 방지. Claude와 독립적으로 선택 가능
-- [Brewfile.ide](Brewfile.ide): WebStorm, IntelliJ, 코드 파일 기본 앱을 WebStorm으로
-- [Brewfile.dev](Brewfile.dev): OrbStack
-- [Brewfile.canary](Brewfile.canary): Chrome Canary, claude 또는 codex도 켜면 각 클라이언트에 chrome-devtools MCP 등록
-- [Brewfile.apps](Brewfile.apps): AdGuard, Notion, LaunchOS, Figma
-- [Brewfile.fonts](Brewfile.fonts): Pretendard, SF
+- [packages/Brewfile.claude](packages/Brewfile.claude): Claude Code와 설정·상태바, 에이전트 `rm` → 휴지통, 작업 중 잠자기 방지
+- [packages/Brewfile.codex](packages/Brewfile.codex): Codex CLI와 설정·전역 지침, 에이전트 `rm` → 휴지통, 작업 중 잠자기 방지. Claude와 독립적으로 선택 가능
+- [packages/Brewfile.ide](packages/Brewfile.ide): WebStorm, IntelliJ, 코드 파일 기본 앱을 WebStorm으로
+- [packages/Brewfile.dev](packages/Brewfile.dev): OrbStack
+- [packages/Brewfile.canary](packages/Brewfile.canary): Chrome Canary, claude 또는 codex도 켜면 각 클라이언트에 chrome-devtools MCP 등록
+- [packages/Brewfile.apps](packages/Brewfile.apps): AdGuard, Notion, LaunchOS, Figma
+- [packages/Brewfile.fonts](packages/Brewfile.fonts): Pretendard, SF
 
 Git 이름과 이메일은 최초 `chezmoi init`에서 입력한다. 기존 Git 설정이 있으면 기본값으로 제안하며, 입력값은 이 Mac의 chezmoi 설정에만 저장한다.
 
@@ -72,5 +72,5 @@ bunx chrome-devtools-mcp@latest --autoConnect --channel canary --no-usage-statis
 
 - `dotfiles-doctor`(에이전트용은 `dotfiles-doctor --json`)는 어긋난 부분을 보여준다: 저장소와 다른 파일, 설치 안 된 패키지·uv 도구, 테마 팔레트 불일치, Claude 설정 불일치, 커밋·push 안 한 변경. 직접 설치했지만 Brewfile에 없는 패키지는 참고용으로만 표시한다.
 - pre-commit hook이 `.githooks/lint`(shellcheck, actionlint, zizmor — CI와 같은 검사)와 스테이징된 변경에 대한 `gitleaks`를 돌린다. 설치 스크립트가 `core.hooksPath`로 켜 둔다.
-- CI는 Claude만 켠 Mac과 Codex만 켠 Mac에 각각 설치한 뒤 zsh 시작, `dotfiles-doctor`, 선택 Brewfile 패키지 이름, `.githooks/lint`를 검사한다. 두 그룹의 네 가지 조합과 Canary on/off, 개인 Codex 설정 보존도 검증한다. push할 때와 매주 실행된다.
+- CI는 Claude만 켠 Mac과 Codex만 켠 Mac에 각각 설치한 뒤 zsh 시작, `dotfiles-doctor`, 선택 packages/Brewfile 패키지 이름, `.githooks/lint`를 검사한다. 두 그룹의 네 가지 조합과 Canary on/off, 개인 Codex 설정 보존도 검증한다. push할 때와 매주 실행된다.
 - [AGENTS.md](AGENTS.md)(`CLAUDE.md`와 동일)에 AI 에이전트를 위한 저장소 규칙과 함정을 정리해 뒀다.

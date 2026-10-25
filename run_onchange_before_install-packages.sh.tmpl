@@ -1,8 +1,8 @@
 #!/bin/bash
 # before files are written, so jq exists for modify_ scripts
-# Brewfile hash: {{ include "Brewfile" | sha256sum }}
+# packages/Brewfile hash: {{ include "packages/Brewfile" | sha256sum }}
 {{- range .groups }}
-# Brewfile.{{ .name }} hash: {{ include (print "Brewfile." .name) | sha256sum }}
+# packages/Brewfile.{{ .name }} hash: {{ include (print "packages/Brewfile." .name) | sha256sum }}
 {{- end }}
 # opt-ins: {{ .install | toJson }}
 # Codex config helper: {{ include "scripts/codex_config.py" | sha256sum }}
@@ -24,10 +24,10 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 brew tap tinted-theming/tinted
 brew trust --formula tinted-theming/tinted/tinty
 
-brew bundle --no-upgrade --file="{{ .chezmoi.sourceDir }}/Brewfile"
+brew bundle --no-upgrade --file="{{ .chezmoi.sourceDir }}/packages/Brewfile"
 {{- range .groups }}
 {{-   if index $.install .name }}
-brew bundle --no-upgrade --file="{{ $.chezmoi.sourceDir }}/Brewfile.{{ .name }}"
+brew bundle --no-upgrade --file="{{ $.chezmoi.sourceDir }}/packages/Brewfile.{{ .name }}"
 {{-   end }}
 {{- end }}
 

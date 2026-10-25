@@ -16,7 +16,7 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 | `.chezmoi.toml.tmpl` | chezmoi config: symlink mode, one prompt per optional group |
 | `.chezmoiversion` | Minimum chezmoi version; older ones refuse to apply |
 | `.chezmoiremove` | `$HOME` targets to delete on apply (removed or renamed sources) |
-| `.chezmoidata/packages.toml` | **Only** place optional Brewfile groups are defined |
+| `.chezmoidata/packages.toml` | **Only** place optional packages/Brewfile groups are defined |
 | `.chezmoidata/telemetry.toml` | **Only** place telemetry opt-outs are defined (env vars, Claude env, per-tool commands + checks) |
 | `.chezmoidata/codex.toml` | Public Codex settings; merge only these keys into the private config |
 | `.chezmoidata/mcp.toml` | Shared Chrome DevTools MCP command and arguments for both clients |
@@ -24,8 +24,8 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 | `scripts/codex_config.py` | TOML-preserving Codex config merger, run by uv with a pinned tomlkit dependency |
 | `scripts/test_agents.py` | Agent group/template, private config, shell PATH and sleep guard regression tests |
 | `.chezmoidata/macos.toml` | **Only** place macOS `defaults` and default apps (duti) are defined |
-| `Brewfile` | Everything the dotfiles depend on |
-| `Brewfile.<group>` | One file per optional group (opt-in, stored as `.install.<group>`). Keep them to essentials only. |
+| `packages/Brewfile` | Everything the dotfiles depend on |
+| `packages/Brewfile.<group>` | One file per optional group (opt-in, stored as `.install.<group>`). Keep them to essentials only. |
 | `uv-tools.txt` | Python CLIs installed with `uv tool install` (e.g. pyrefly) |
 | `run_onchange_before_install-packages.sh.tmpl` | brew bundle, tap trust, uv tools, gh/codex telemetry, Claude Code MCP servers, git hooks path |
 | `run_onchange_after_macos-defaults.sh.tmpl` | `defaults write` and `duti -s` for each entry in `macos.toml`, then relaunches apps |
@@ -45,7 +45,7 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 - **Templates are copies.** Edit the `.tmpl` in the repo, then run `chezmoi apply`. Never edit the rendered file in `$HOME`, because the next apply overwrites it.
 - **`executable_` files are copies too**, not symlinks: `~/.local/bin/dotfiles-doctor`, `~/.local/bin/claude-sync`, `~/.claude/statusline.sh`. Edit them in `dot_local/bin/` / `dot_claude/` and run `chezmoi apply`.
 - **Colors.** Never hardcode a hex color or theme name. Add a key to `.chezmoidata/theme.toml` and reference it as `{{ .theme.palette.base0D }}` from a `.tmpl`. Shell-side consumers read `~/.config/zsh/theme.zsh`. Tools that accept ANSI color names (delta's `base16` theme, zsh-patina) should use those so they follow the palette automatically. When changing `theme.scheme`, copy the palette from tinty's scheme yaml, and `dotfiles-doctor` flags any mismatch.
-- **Fonts.** Terminal fonts live in `theme.font` in `theme.toml`, and Ghostty is rendered from it. Changing a font means editing `theme.font.families` **and** its `cask` in `Brewfile`. `dotfiles-doctor` fails if they disagree or Ghostty can't find the family name, because Ghostty otherwise silently falls back to a default font.
+- **Fonts.** Terminal fonts live in `theme.font` in `theme.toml`, and Ghostty is rendered from it. Changing a font means editing `theme.font.families` **and** its `cask` in `packages/Brewfile`. `dotfiles-doctor` fails if they disagree or Ghostty can't find the family name, because Ghostty otherwise silently falls back to a default font.
 - **Claude Code settings.** `dot_claude/modify_settings.json.tmpl` builds `~/.claude/settings.json` from `claude-settings.json`, adds `telemetry.claude_env`, and keeps the machine's local `autoMode` block, which holds private repo names and never goes in git. `claude-sync` does the reverse and strips both. After changing settings via `/config`, run `claude-sync`. Never add telemetry keys to `claude-settings.json` directly.
 - **Codex settings.** `private_dot_codex/modify_private_config.toml.tmpl` passes public template data to `scripts/codex_config.py`. The merger changes only `.codex`, `telemetry.codex` and the shared Canary MCP transport, preserving comments, model/provider choices, trust and private MCP credentials. Never add the live config, auth, sessions, rules or plugin state to git. Manage public defaults in `.chezmoidata/codex.toml`; telemetry belongs only in telemetry.toml. `uv run --script` provisions its pinned TOML dependency before mise's after-script. The modifier must receive rendered data, not read the user's global chezmoi config, so overrides and isolated destinations work.
 - **Global agent instructions.** `.chezmoidata/agents.toml` is the shared source for both global instruction files. Their modify templates use `.chezmoitemplates/agent-instructions` to replace only the marked managed block, preserving private local guidance outside it. Updating agents.toml updates both clients on apply. The `.tmpl` suffix also avoids chezmoi's automatic exclusion of plain AGENTS.md/CLAUDE.md sources. Keep common instructions, MCP transports and telemetry in shared data; client-specific model/UI settings remain separate.
@@ -64,13 +64,13 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 - **A newer chezmoi feature:** bump `.chezmoiversion` to the release that added it.
 - **An empty file** (e.g. `~/.hushlogin`): chezmoi skips empty sources unless they're named `empty_dot_…`.
 - **A config file:** `chezmoi add <path>`. Then check the source name has no `private_` or `executable_` prefix it doesn't need, because those attributes make chezmoi **copy** instead of symlink. `chmod 644` the target if needed.
-- **A package:** add it to `Brewfile` if a dotfile depends on it, otherwise to the matching optional `Brewfile.*` — only if it's genuinely essential. Packages installed by hand and not listed anywhere are fine; `dotfiles-doctor` lists them as informational.
-  - A new optional group needs two things: a `[[groups]]` entry in `.chezmoidata/packages.toml` and a `Brewfile.<name>`. Nothing else, because the prompt, install script, doctor and CI all loop over that list. Then run `chezmoi init` to answer the new prompt. Descriptions must not contain commas.
+- **A package:** add it to `packages/Brewfile` if a dotfile depends on it, otherwise to the matching optional `packages/Brewfile.*` — only if it's genuinely essential. Packages installed by hand and not listed anywhere are fine; `dotfiles-doctor` lists them as informational.
+  - A new optional group needs two things: a `[[groups]]` entry in `.chezmoidata/packages.toml` and a `packages/Brewfile.<name>`. Nothing else, because the prompt, install script, doctor and CI all loop over that list. Then run `chezmoi init` to answer the new prompt. Descriptions must not contain commas.
   - A group also gates its config in `.chezmoiignore`, scripts and doctor. Use `index .install "<name>"`, not `.install.<name>`: old machines may have no key. `claude` gates `~/.claude` and `claude-sync`; `codex` gates managed files under `~/.codex`. Either enables `agent-bin` and `agent-sleep-guard`; remove shared guard setup only when both are off. Canary MCP is configured for each enabled agent when `canary` is on. Turning Canary off disables only the matching managed Codex transport, preserving credentials. Default apps need `ide`.
   - `.chezmoi.toml.tmpl` can't see `.chezmoidata` (it isn't loaded at init yet), so it reads `packages.toml` with `include … | fromToml`.
   - CI installs separately with `claude = true` or `codex = true`, then `chezmoi init --promptDefaults`. Regression tests render both/one/neither with Canary on/off and missing group keys. Don't use `--promptBool`: it matches by prompt text and splits on commas.
   - Formulae from third-party taps need an explicit `brew trust --formula|--cask <full/name>` line in the install script (Homebrew 7 refuses untrusted taps). Trust the single formula, not the whole tap.
-  - The install script uses `brew bundle --no-upgrade`. Without it, every Brewfile change also upgrades every outdated package (minutes of big cask downloads). Upgrades are a separate, deliberate `brew upgrade`.
+  - The install script uses `brew bundle --no-upgrade`. Without it, every packages/Brewfile change also upgrades every outdated package (minutes of big cask downloads). Upgrades are a separate, deliberate `brew upgrade`.
   - Python CLIs not in Homebrew go in `uv-tools.txt`. The install script installs them and `dotfiles-doctor` checks them.
   - Some formulae aren't binaries (e.g. `antidote` is a sourced zsh script). Don't check them with `command -v`.
 - **A shell shortcut:** if it shadows a standard command with a tool whose flags differ (`ls`→eza, `cat`→bat), use `zsh-abbr` in `dot_zshrc`, not `alias`, so pasted commands still get the real tool. The exception is a replacement that accepts the original's flags: `grep`→ugrep and `find`→bfs are plain aliases, using the same flags as Claude Code's Bash tool so human and agent get the same results. New names (`ll`, `la`) can be plain aliases. Shadowing an existing command needs `abbr -S -q -f … >/dev/null` (without `-f` it silently refuses).
@@ -82,9 +82,9 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 ## Before committing
 
 1. `chezmoi apply` (or `chezmoi diff` for a dry run).
-2. Run `dotfiles-doctor --json` and expect `"ok": true` once committed and pushed. Each failing field has a hint in `fixes`. `brew.unlisted` is informational, listing packages the user installed by hand, so never add them to a Brewfile unless asked.
+2. Run `dotfiles-doctor --json` and expect `"ok": true` once committed and pushed. Each failing field has a hint in `fixes`. `brew.unlisted` is informational, listing packages the user installed by hand, so never add them to a packages/Brewfile unless asked.
 3. Commit. The pre-commit hook runs `.githooks/lint` (the same checks as CI) and gitleaks, and you shouldn't bypass it. When adding a lint, put it in `.githooks/lint` so both stay in step.
-4. Push. Don't block on CI (the macOS run takes 2–5 min), so check `gh run list -L1` later. CI installs each agent independently, checks doctor, resolves optional Brewfile names, and runs `.githooks/lint`. A red CI means a new Mac would break.
+4. Push. Don't block on CI (the macOS run takes 2–5 min), so check `gh run list -L1` later. CI installs each agent independently, checks doctor, resolves optional packages/Brewfile names, and runs `.githooks/lint`. A red CI means a new Mac would break.
 
 Note: `claude-code@latest` and `chrome-devtools-mcp@latest` float on purpose, so a weekly CI failure may come from a new upstream release rather than a change here.
 
