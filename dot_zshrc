@@ -49,10 +49,10 @@ eval "$(atuin init zsh)"
 # ---- aliases ----
 alias ll='eza -l --icons --group-directories-first'
 alias la='eza -la --icons --group-directories-first'
-alias tree='eza --tree --icons'
 # abbreviations, not aliases: pasted commands with POSIX flags still get the real tool
 abbr -S -q -f ls='eza --icons --group-directories-first' >/dev/null
 abbr -S -q -f cat='bat --style=plain' >/dev/null
+abbr -S -q -f tree='eza --tree --icons' >/dev/null
 alias grep='ugrep -G --ignore-files --hidden -I --exclude-dir=.git'
 alias find='bfs -regextype findutils-default'
 
