@@ -4,3 +4,10 @@ AGENTS.md
 CLAUDE.md
 claude-settings.json
 uv-tools.txt
+{{- if not (index .install "claude") }}
+.claude/settings.json
+.claude/statusline.sh
+.local/agent-bin
+.local/bin/claude-sync
+.local/bin/agent-sleep-guard
+{{- end }}

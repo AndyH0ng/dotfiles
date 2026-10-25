@@ -1,12 +1,25 @@
 # Each group needs a Brewfile.<name>. Descriptions become prompt text: no commas.
+# A group can also gate config: .chezmoiignore, scripts and dotfiles-doctor read it with (index .install "<name>").
+
+[[groups]]
+name = "claude"
+description = "Claude Code with its settings/statusline/agent rm to Trash/sleep guard"
+
+[[groups]]
+name = "ide"
+description = "WebStorm/IntelliJ and code files opening in WebStorm"
 
 [[groups]]
 name = "dev"
-description = "IDEs/OrbStack/Chrome Canary/Figma"
+description = "OrbStack"
+
+[[groups]]
+name = "canary"
+description = "Chrome Canary and the chrome-devtools MCP for Claude Code"
 
 [[groups]]
 name = "apps"
-description = "AdGuard/Notion/LaunchOS"
+description = "AdGuard/Notion/LaunchOS/Figma"
 
 [[groups]]
 name = "fonts"

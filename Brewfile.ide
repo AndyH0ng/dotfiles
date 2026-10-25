@@ -1,0 +1,3 @@
+cask "webstorm"
+cask "intellij-idea"
+brew "duti"                   # default apps (.chezmoidata/macos.toml)

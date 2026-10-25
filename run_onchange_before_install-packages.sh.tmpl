@@ -33,7 +33,6 @@ grep -vE '^\s*(#|$)' "{{ .chezmoi.sourceDir }}/uv-tools.txt" | while read -r too
   uv tool install "$tool"
 done
 
-# telemetry opt-outs
 {{- range .telemetry.commands }}
 if command -v {{ .tool }} >/dev/null 2>&1; then
   {{ .run }}
@@ -42,10 +41,12 @@ fi
 
 # Claude Code MCP. Here, not the after-script: the first `claude` run on a fresh
 # Mac rewrites ~/.claude/settings.json. Remove first so arg changes apply.
+{{- if and (index .install "claude") (index .install "canary") }}
 if command -v claude >/dev/null 2>&1; then
   claude mcp remove chrome-devtools -s user >/dev/null 2>&1 || true
   claude mcp add chrome-devtools -s user -- \
     bunx chrome-devtools-mcp@latest --autoConnect --channel canary --no-usage-statistics
 fi
+{{- end }}
 
 git -C "{{ .chezmoi.sourceDir }}" config core.hooksPath .githooks

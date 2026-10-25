@@ -1,6 +1,7 @@
 #!/bin/bash
-# Runs on every apply and changes nothing once installed. Root files prompt for
-# sudo only when missing or changed. CI has no login session.
+# Runs on every apply: installs with the claude group, removes without it, and
+# changes nothing once done. Root files prompt for sudo only when they need to
+# change. CI has no login session.
 set -euo pipefail
 [ -n "${CI:-}" ] && exit 0
 
@@ -9,6 +10,7 @@ guard="$HOME/.local/bin/agent-sleep-guard"
 sudoers=/etc/sudoers.d/agent-sleep-guard
 daemon=/Library/LaunchDaemons/$label-reset.plist
 agent="$HOME/Library/LaunchAgents/$label.plist"
+{{- if index .install "claude" }}
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
@@ -59,3 +61,20 @@ if ! cmp -s "$tmp/agent" "$agent" || ! launchctl print "gui/$(id -u)/$label" >/d
   launchctl bootout "gui/$(id -u)/$label" 2>/dev/null || true
   launchctl bootstrap "gui/$(id -u)" "$agent"
 fi
+{{- else }}
+
+if launchctl print "gui/$(id -u)/$label" >/dev/null 2>&1; then
+  launchctl bootout "gui/$(id -u)/$label"
+fi
+rm -f "$agent" "$guard"
+
+if [ -e "$sudoers" ] || [ -e "$daemon" ]; then
+  # release a hold the guard may have left, while the sudoers entry still allows it
+  sudo -n /usr/bin/pmset -a disablesleep 0 2>/dev/null || true
+  if [ ! -t 0 ]; then
+    echo "agent-sleep-guard: skipped root cleanup (needs sudo; rerun chezmoi apply in a terminal)" >&2
+  else
+    sudo rm -f "$sudoers" "$daemon"
+  fi
+fi
+{{- end }}

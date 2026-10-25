@@ -24,7 +24,7 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 | `uv-tools.txt` | Python CLIs installed with `uv tool install` (e.g. pyrefly) |
 | `run_onchange_before_install-packages.sh.tmpl` | brew bundle, tap trust, uv tools, gh/codex telemetry, Claude Code MCP servers, git hooks path |
 | `run_onchange_after_macos-defaults.sh.tmpl` | `defaults write` and `duti -s` for each entry in `macos.toml`, then relaunches apps |
-| `run_after_agent-sleep-guard.sh.tmpl` | Keeps the Mac awake through a lid close while Claude Code works. Installs a sudoers entry for `pmset disablesleep`, a boot-time reset daemon and a LaunchAgent; a no-op once installed |
+| `run_after_agent-sleep-guard.sh.tmpl` | Keeps the Mac awake through a lid close while Claude Code works. Installs a sudoers entry for `pmset disablesleep`, a boot-time reset daemon and a LaunchAgent, and removes them again when the `claude` group is off; a no-op once done |
 | `run_onchange_after_setup.sh.tmpl` | `mise install --locked`, tinty theme |
 | `dot_config/mise/mise.lock` | Exact runtime versions + checksums that `latest`/`lts` resolve to |
 | `claude-settings.json` | Source for `~/.claude/settings.json` (see below) |
@@ -55,8 +55,9 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 - **A config file:** `chezmoi add <path>`. Then check the source name has no `private_` or `executable_` prefix it doesn't need, because those attributes make chezmoi **copy** instead of symlink. `chmod 644` the target if needed.
 - **A package:** add it to `Brewfile` if a dotfile depends on it, otherwise to the matching optional `Brewfile.*` — only if it's genuinely essential. Packages installed by hand and not listed anywhere are fine; `dotfiles-doctor` lists them as informational.
   - A new optional group needs two things: a `[[groups]]` entry in `.chezmoidata/packages.toml` and a `Brewfile.<name>`. Nothing else, because the prompt, install script, doctor and CI all loop over that list. Then run `chezmoi init` to answer the new prompt. Descriptions must not contain commas.
+  - A group also gates the config that only makes sense with its apps: list the targets under its `{{ if not (index .install "<name>") }}` block in `.chezmoiignore`, wrap scripts in `{{ if index .install "<name>" }}`, and skip its `dotfiles-doctor` checks when it's off. Use `index`, not `.install.<name>`: a machine that hasn't answered the new prompt yet has no key, and `.install.<name>` errors. Today `claude` gates `~/.claude`, `claude-sync`, `agent-bin`, `agent-sleep-guard`; the chrome-devtools MCP needs `claude` and `canary`; default apps need `ide`.
   - `.chezmoi.toml.tmpl` can't see `.chezmoidata` (it isn't loaded at init yet), so it reads `packages.toml` with `include … | fromToml`.
-  - CI uses `chezmoi init --promptDefaults` (every group off). Don't use `--promptBool`: it matches by prompt text and splits on commas.
+  - CI pre-seeds `claude = true` in the chezmoi config (`promptBoolOnce` keeps an existing answer), then runs `chezmoi init --promptDefaults` so every other group is off. Don't use `--promptBool`: it matches by prompt text and splits on commas.
   - Formulae from third-party taps need an explicit `brew trust --formula|--cask <full/name>` line in the install script (Homebrew 7 refuses untrusted taps). Trust the single formula, not the whole tap.
   - The install script uses `brew bundle --no-upgrade`. Without it, every Brewfile change also upgrades every outdated package (minutes of big cask downloads). Upgrades are a separate, deliberate `brew upgrade`.
   - Python CLIs not in Homebrew go in `uv-tools.txt`. The install script installs them and `dotfiles-doctor` checks them.
@@ -72,7 +73,7 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 1. `chezmoi apply` (or `chezmoi diff` for a dry run).
 2. Run `dotfiles-doctor --json` and expect `"ok": true` once committed and pushed. Each failing field has a hint in `fixes`. `brew.unlisted` is informational, listing packages the user installed by hand, so never add them to a Brewfile unless asked.
 3. Commit. The pre-commit hook runs `.githooks/lint` (the same checks as CI) and gitleaks, and you shouldn't bypass it. When adding a lint, put it in `.githooks/lint` so both stay in step.
-4. Push. Don't block on CI (the macOS run takes 2–5 min), so check `gh run list -L1` later. CI installs from scratch with every optional group off, requires `dotfiles-doctor` to be clean, resolves every name in the optional Brewfiles, and runs `.githooks/lint`. A red CI means a new Mac would break.
+4. Push. Don't block on CI (the macOS run takes 2–5 min), so check `gh run list -L1` later. CI installs from scratch with only the `claude` group on, requires `dotfiles-doctor` to be clean, resolves every name in the optional Brewfiles, and runs `.githooks/lint`. A red CI means a new Mac would break.
 
 Note: `claude-code@latest` and `chrome-devtools-mcp@latest` float on purpose, so a weekly CI failure may come from a new upstream release rather than a change here.
 

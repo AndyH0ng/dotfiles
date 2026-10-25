@@ -17,7 +17,6 @@ domain = "NSGlobalDomain"
 key = "ApplePressAndHoldEnabled"
 value = false
 
-# text substitution
 [[macos.defaults]]
 domain = "NSGlobalDomain"
 key = "NSAutomaticCapitalizationEnabled"
@@ -33,7 +32,6 @@ domain = "NSGlobalDomain"
 key = "NSAutomaticQuoteSubstitutionEnabled"
 value = false
 
-# finder
 [[macos.defaults]]
 domain = "com.apple.finder"
 key = "ShowPathbar"
@@ -53,7 +51,6 @@ key = "FXRemoveOldTrashItems"
 value = true
 restart = "Finder"
 
-# .DS_Store
 [[macos.defaults]]
 domain = "com.apple.desktopservices"
 key = "DSDontWriteNetworkStores"
@@ -68,5 +65,5 @@ value = true
 # An extension without a registered UTI (dyn.*: cts, jsx, cjs, jsonc, scss) can't be set.
 [[macos.default_apps]]
 app = "com.jetbrains.WebStorm"
-group = "dev"
+group = "ide"
 extensions = ["ts", "tsx", "mts", "js", "mjs", "json", "md", "mdx", "yaml", "yml", "toml", "css", "sh", "zsh"]

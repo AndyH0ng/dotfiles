@@ -5,21 +5,29 @@
 ## 설치
 
 ```sh
-sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply AndyH0ng
+xcode-select --install   # 먼저: 새 Mac의 git은 Command Line Tools 설치 창만 띄우는 껍데기다
+sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply --source ~/dotfiles AndyH0ng
 ```
 
-필요하면 Homebrew를 설치하고, [Brewfile](Brewfile)로 `brew bundle`을 실행한 뒤 tinty 테마를 적용한다. `chezmoi init` 때 선택 그룹마다 설치 여부를 한 번씩 묻는다: [Brewfile.dev](Brewfile.dev) (IDE, OrbStack, Chrome Canary, Figma), [Brewfile.apps](Brewfile.apps) (AdGuard, Notion, LaunchOS), [Brewfile.fonts](Brewfile.fonts) (Pretendard, SF).
+필요하면 Homebrew를 설치하고, [Brewfile](Brewfile)로 `brew bundle`을 실행한 뒤 tinty 테마를 적용한다. `chezmoi init` 때 선택 그룹마다 설치 여부를 한 번씩 묻는다. 그룹을 켜면 앱과 그에 딸린 설정이 같이 들어간다.
+
+- [Brewfile.claude](Brewfile.claude): Claude Code와 설정·상태바, 에이전트 `rm` → 휴지통, 작업 중 잠자기 방지
+- [Brewfile.ide](Brewfile.ide): WebStorm, IntelliJ, 코드 파일 기본 앱을 WebStorm으로
+- [Brewfile.dev](Brewfile.dev): OrbStack
+- [Brewfile.canary](Brewfile.canary): Chrome Canary, claude도 켜면 chrome-devtools MCP 등록
+- [Brewfile.apps](Brewfile.apps): AdGuard, Notion, LaunchOS, Figma
+- [Brewfile.fonts](Brewfile.fonts): Pretendard, SF
 
 ## 구성
 
 - **쉘**: zsh + [antidote](https://github.com/mattmc3/antidote) 플러그인(fzf-tab, autosuggestions, completions, zsh-abbr), [starship](https://starship.rs) 프롬프트, [zsh-patina](https://github.com/michel-kraemer/zsh-patina) 구문 강조
 - **터미널**: 커스텀 아이콘을 쓴 [Ghostty](https://ghostty.org), IBM Plex Mono + D2Coding + Nerd Font 심볼
 - **테마**: base16-snazzy. [`.chezmoidata/theme.toml`](.chezmoidata/theme.toml) 한 곳에서 정의하고 Ghostty, starship, Claude Code 상태바, [tinty](https://github.com/tinted-theming/tinty)(쉘 + fzf), `vivid`(`LS_COLORS`)에 반영
-- **도구**: mise(언어 런타임), zoxide, fzf, atuin(인라인, 10줄), eza, bat, fd, xh, fastfetch, `grep`/`find`는 옵션 호환인 [ugrep](https://ugrep.com)/[bfs](https://github.com/tavianator/bfs)로 대체(Claude Code와 같은 엔진), AI 에이전트의 `rm`은 휴지통으로 이동(사람은 그대로 삭제, 휴지통은 30일 뒤 자동 비움), Claude Code가 작업 중이면 뚜껑을 닫아도 잠들지 않음(처음 한 번 터미널에서 `chezmoi apply`로 sudo 승인)
+- **도구**: mise(언어 런타임), zoxide, fzf, atuin(인라인, 10줄), eza, bat, fd, xh, fastfetch, `grep`/`find`는 옵션 호환인 [ugrep](https://ugrep.com)/[bfs](https://github.com/tavianator/bfs)로 대체(Claude Code와 같은 엔진), claude 그룹이면 AI 에이전트의 `rm`은 휴지통으로 이동(사람은 그대로 삭제, 휴지통은 30일 뒤 자동 비움), Claude Code가 작업 중이면 뚜껑을 닫아도 잠들지 않음(처음 한 번 터미널에서 `chezmoi apply`로 sudo 승인)
 - **Python**: uv, ruff, [pyrefly](https://pyrefly.org)(타입 체커, [uv-tools.txt](uv-tools.txt)로 설치)
 - **Git**: 최신 기본값(histogram diff, zdiff3, rerere, autoSetupRemote), pager로 [delta](https://github.com/dandavison/delta) 사용(lazygit 포함), [mergiraf](https://mergiraf.org)로 구문 기반 merge(TS·JSON·YAML 등), 서명 키가 있을 때만 SSH 커밋 서명
-- **Claude Code**: `settings.json`(플러그인, 테마, 상태바)과 base16-snazzy [상태바](dot_claude/executable_statusline.sh.tmpl), 실행 중인 Chrome Canary에 붙는 chrome-devtools MCP(`chrome://inspect/#remote-debugging`에서 원격 디버깅을 켜야 함)
-- **macOS 설정**: 키 반복, 텍스트 자동 치환 끄기, Finder 경로 막대, 네트워크·USB에 `.DS_Store` 안 만들기, dev 그룹이면 코드 파일 기본 앱을 WebStorm으로(duti) 등. 목록은 [`.chezmoidata/macos.toml`](.chezmoidata/macos.toml) 한 곳에 있다
+- **Claude Code**: `settings.json`(플러그인, 테마, 상태바)과 base16-snazzy [상태바](dot_claude/executable_statusline.sh.tmpl), canary 그룹이면 실행 중인 Chrome Canary에 붙는 chrome-devtools MCP(`chrome://inspect/#remote-debugging`에서 원격 디버깅을 켜야 함)
+- **macOS 설정**: 키 반복, 텍스트 자동 치환 끄기, Finder 경로 막대, 네트워크·USB에 `.DS_Store` 안 만들기, ide 그룹이면 코드 파일 기본 앱을 WebStorm으로(duti) 등. 목록은 [`.chezmoidata/macos.toml`](.chezmoidata/macos.toml) 한 곳에 있다
 - **프라이버시**: Homebrew, gh, Claude Code, Codex, CodeRabbit, 주요 JS 도구의 텔레메트리 끔. 목록은 [`.chezmoidata/telemetry.toml`](.chezmoidata/telemetry.toml) 한 곳에 있다
 
 ## 수정하기

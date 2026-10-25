@@ -1,6 +1,1 @@
-cask "webstorm"
-cask "intellij-idea"
 cask "orbstack"
-cask "google-chrome@canary"   # chrome-devtools MCP uses --channel canary
-cask "figma"
-brew "duti"                   # default apps (.chezmoidata/macos.toml)

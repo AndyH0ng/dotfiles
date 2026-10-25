@@ -25,8 +25,13 @@ jobs:
       - name: Install chezmoi
         run: brew install chezmoi
 
+      - name: Turn on the claude group
+        # promptBoolOnce keeps an existing answer; --promptDefaults turns the rest off
+        run: |
+          mkdir -p ~/.config/chezmoi
+          printf '[data.install]\nclaude = true\n' > ~/.config/chezmoi/chezmoi.toml
+
       - name: chezmoi init --apply
-        # --promptDefaults: every optional group off
         run: chezmoi init --apply --no-tty --promptDefaults --source "$GITHUB_WORKSPACE"
 
       - name: Interactive zsh starts cleanly
@@ -45,7 +50,7 @@ jobs:
           jq -e '.chezmoi_drift == [] and .dangling_symlinks == [] and .brew.missing == [] and .uv_tools_missing == []
                  and .theme_mismatch == [] and .font_mismatch == []
                  and .telemetry_on == [] and .macos_defaults_mismatch == []
-                 and .claude_settings_in_sync' "$RUNNER_TEMP/doctor.json"
+                 and .claude_settings_in_sync and .claude_mcp_missing == []' "$RUNNER_TEMP/doctor.json"
 
       - name: Optional Brewfiles reference real packages
         # groups are off above, so at least check every name resolves
@@ -79,7 +84,6 @@ jobs:
           echo '{"model":{"display_name":"x"},"workspace":{"current_dir":"/tmp"}}' | ~/.claude/statusline.sh
           jq -e '.statusLine' ~/.claude/settings.json >/dev/null
           test -L ~/.gitconfig
-          jq -e '.mcpServers["chrome-devtools"].args | index("--autoConnect")' ~/.claude.json >/dev/null
           test "$(git config --global --get merge.conflictStyle)" = zdiff3
           # no signing key on the runner
           test -z "$(git config --global --includes --get commit.gpgSign)"
