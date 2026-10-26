@@ -23,9 +23,9 @@ for path in (ROOT / ".chezmoidata").glob("*.toml"):
     DATA.update(tomllib.loads(path.read_text()))
 
 
-def settings(codex=True, canary=True):
+def settings(codex=True, canary=True, imcp=False):
     data = copy.deepcopy(DATA)
-    data["install"] = {"codex": codex, "canary": canary}
+    data["install"] = {"codex": codex, "canary": canary, "imcp": imcp}
     return data
 
 
@@ -86,6 +86,31 @@ enabled = true # previously enabled
             tomlkit.parse(render(local, settings(canary=False)))["mcp_servers"][
                 "chrome-devtools"
             ]["command"],
+            "personal-command",
+        )
+
+    def test_imcp_toggle_preserves_private_transport(self):
+        current = render("", settings(imcp=True))
+        doc = tomlkit.parse(current)
+        self.assertEqual(
+            doc["mcp_servers"]["iMCP"]["command"], DATA["mcp"]["imcp"]["command"]
+        )
+        self.assertTrue(doc["mcp_servers"]["iMCP"]["enabled"])
+        doc["mcp_servers"]["iMCP"]["env"] = {"LOCAL_SETTING": "keep"}
+        disabled = tomlkit.parse(render(tomlkit.dumps(doc), settings()))
+        self.assertFalse(disabled["mcp_servers"]["iMCP"]["enabled"])
+        self.assertEqual(
+            disabled["mcp_servers"]["iMCP"]["env"]["LOCAL_SETTING"], "keep"
+        )
+        local = '[mcp_servers.iMCP]\ncommand="personal-command"\n'
+        self.assertNotIn(
+            "iMCP",
+            tomlkit.parse(render("", settings(codex=False, imcp=True))).get(
+                "mcp_servers", {}
+            ),
+        )
+        self.assertEqual(
+            tomlkit.parse(render(local, settings()))["mcp_servers"]["iMCP"]["command"],
             "personal-command",
         )
 
@@ -154,26 +179,38 @@ class AgentIntegrationTests(unittest.TestCase):
 
     def test_git_identity_defaults_and_saved_answers(self):
         global_config = self.temp / "gitconfig"
-        global_config.write_text('[user]\nname = Test User\nemail = test@example.invalid\n')
+        global_config.write_text(
+            "[user]\nname = Test User\nemail = test@example.invalid\n"
+        )
         env = {**os.environ, "GIT_CONFIG_GLOBAL": str(global_config)}
         command = self.base + ["init", "--promptDefaults", "--no-tty"]
         subprocess.run(command, env=env, check=True, capture_output=True, text=True)
         identity = tomllib.loads(self.config.read_text())["data"]["git"]
-        self.assertEqual(identity, {"name": "Test User", "email": "test@example.invalid"})
+        self.assertEqual(
+            identity, {"name": "Test User", "email": "test@example.invalid"}
+        )
         rendered = subprocess.check_output(
-            self.base + ["execute-template", "--file", str(ROOT / "dot_config/git/local.tmpl")],
+            self.base
+            + ["execute-template", "--file", str(ROOT / "dot_config/git/local.tmpl")],
             text=True,
         )
         target = self.temp / "rendered-gitconfig"
         target.write_text(rendered)
         for key, value in identity.items():
-            self.assertEqual(subprocess.check_output(
-                ["git", "config", "--file", str(target), "--get", f"user.{key}"],
-                text=True,
-            ).strip(), value)
-        global_config.write_text('[user]\nname = Other User\nemail = other@example.invalid\n')
+            self.assertEqual(
+                subprocess.check_output(
+                    ["git", "config", "--file", str(target), "--get", f"user.{key}"],
+                    text=True,
+                ).strip(),
+                value,
+            )
+        global_config.write_text(
+            "[user]\nname = Other User\nemail = other@example.invalid\n"
+        )
         subprocess.run(command, env=env, check=True, capture_output=True, text=True)
-        self.assertEqual(tomllib.loads(self.config.read_text())["data"]["git"], identity)
+        self.assertEqual(
+            tomllib.loads(self.config.read_text())["data"]["git"], identity
+        )
 
     def test_telemetry_command_never_reenters_chezmoi(self):
         mock_bin = self.temp / "bin"

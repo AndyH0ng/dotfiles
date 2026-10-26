@@ -1,17 +1,17 @@
-# ---- completion ----
-autoload -Uz compinit
-# full compinit at most once a day. The glob qualifier doesn't expand inside [[ ]].
-_stale=(~/.zcompdump(N.mh+24))
-if (( $#_stale )) || [[ ! -s ~/.zcompdump ]]; then
-  compinit
-  zcompile ~/.zcompdump
-else
-  compinit -C
-fi
-unset _stale
-
 source ~/.config/zsh/theme.zsh
-export LS_COLORS="$(vivid generate "$VIVID_THEME")"
+# Regenerate colors only when the theme or vivid changes.
+_colors_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/ls-colors-${VIVID_THEME}"
+if [[ ! -s $_colors_cache || ~/.config/zsh/theme.zsh -nt $_colors_cache || ${commands[vivid]} -nt $_colors_cache ]]; then
+  export LS_COLORS="$(vivid generate "$VIVID_THEME")"
+  if [[ -n $LS_COLORS ]]; then
+    mkdir -p "${_colors_cache:h}"
+    print -rn -- "$LS_COLORS" > "${_colors_cache}.$$"
+    mv -f "${_colors_cache}.$$" "$_colors_cache"
+  fi
+else
+  export LS_COLORS="$(<"$_colors_cache")"
+fi
+unset _colors_cache
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 # smart case: lowercase matches either case, uppercase only itself
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
@@ -19,7 +19,7 @@ zstyle ':completion:*' menu no                   # fzf-tab replaces the menu
 zstyle ':completion:*:descriptions' format '[%d]' # fzf-tab needs this for groups
 zstyle ':completion:*:git-checkout:*' sort false # keep git's recency order
 zstyle ':fzf-tab:*' switch-group '<' '>'
-zstyle ':fzf-tab:complete:(cd|__zoxide_z):*' fzf-preview 'eza -1 --color=always --icons $realpath'
+zstyle ':fzf-tab:complete:(cd|__zoxide_z):*' fzf-preview 'eza -1 --color=always --icons=always -- "$realpath"'
 
 # ---- tinty ----
 export BASE16_SHELL_SET_BACKGROUND=false
@@ -40,9 +40,9 @@ eval "$(zoxide init zsh)"
 # fd: respects .gitignore and includes dotfiles (fzf's own walker does neither)
 export FZF_DEFAULT_COMMAND='fd --hidden --exclude .git'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-export FZF_CTRL_T_OPTS="--preview '[ -d {} ] && eza --tree --level=2 --color=always --icons {} || bat --color=always --style=numbers --line-range=:200 {}'"
+export FZF_CTRL_T_OPTS="--preview '[ -d {} ] && eza --tree --level=2 --color=always --icons=always -- {} || bat --color=always --style=numbers --line-range=:200 {}'"
 export FZF_ALT_C_COMMAND='fd --type d --hidden --exclude .git'
-export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --color=always --icons {}'"
+export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --color=always --icons=always -- {}'"
 source <(fzf --zsh)
 eval "$(atuin init zsh)"
 

@@ -3,6 +3,9 @@ typeset -U path PATH
 
 # here, not .zshrc, so non-interactive shells (agents, scripts) see them too
 path=(~/.local/bin ~/.local/share/mise/shims ~/.bun/bin /opt/homebrew/bin /opt/homebrew/sbin $path)
+# OrbStack installs these links on first launch; expose them to agents too.
+[[ -d ~/.orbstack/bin ]] && path+=(~/.orbstack/bin)
+
 [[ -n $CLAUDECODE || $DOTFILES_AGENT == codex ]] && path=(~/.local/agent-bin $path)
 
 [[ -r ~/.config/zsh/telemetry.zsh ]] && source ~/.config/zsh/telemetry.zsh

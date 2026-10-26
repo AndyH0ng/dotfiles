@@ -1,6 +1,6 @@
 eval "$(/opt/homebrew/bin/brew shellenv zsh)"
 # OrbStack
-source ~/.orbstack/shell/init.zsh 2>/dev/null || :
+[[ -r ~/.orbstack/shell/init.zsh ]] && source ~/.orbstack/shell/init.zsh
 
 # Login setup reorders PATH; keep locked runtimes and agent commands first.
 path=(~/.local/bin ~/.local/share/mise/shims ~/.bun/bin $path)

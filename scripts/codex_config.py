@@ -51,14 +51,18 @@ def render(current, data, telemetry_only=False):
             defaults["sandbox_workspace_write"] = sandbox
         merge(doc, defaults)
         servers = doc.get("mcp_servers", {})
-        spec = data["mcp"]["chrome_devtools"]
-        if data.get("install", {}).get("canary", False):
-            merge(doc, {"mcp_servers": {"chrome-devtools": {**spec, "enabled": True}}})
-        elif "chrome-devtools" in servers:
-            server = servers["chrome-devtools"]
-            # Disable only our transport; leave personal MCPs and credentials alone.
-            if all(server.get(key) == value for key, value in spec.items()):
-                server["enabled"] = False
+        for group, name, key in (
+            ("canary", "chrome-devtools", "chrome_devtools"),
+            ("imcp", "iMCP", "imcp"),
+        ):
+            spec = data["mcp"][key]
+            if data.get("install", {}).get(group, False):
+                merge(doc, {"mcp_servers": {name: {**spec, "enabled": True}}})
+            elif name in servers:
+                server = servers[name]
+                # Disable only our transport; preserve personal MCPs and credentials.
+                if all(server.get(key) == value for key, value in spec.items()):
+                    server["enabled"] = False
     return tomlkit.dumps(doc)
 
 

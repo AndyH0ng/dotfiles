@@ -1,6 +1,7 @@
-# fzf-tab must come before widget-wrapping plugins. Syntax highlighting is
-# zsh-patina (end of .zshrc), not a plugin here.
+# Register completion paths before compinit; widget plugins follow it.
+zsh-users/zsh-completions kind:fpath path:src
+olets/zsh-abbr kind:fpath path:completions
+~/.config/zsh/completion.zsh
 Aloxaf/fzf-tab
 zsh-users/zsh-autosuggestions
-zsh-users/zsh-completions
 olets/zsh-abbr

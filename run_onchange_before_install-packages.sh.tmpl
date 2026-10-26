@@ -23,6 +23,10 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # trust the formula, not the whole tap
 brew tap tinted-theming/tinted
 brew trust --formula tinted-theming/tinted/tinty
+{{- if index .install "imcp" }}
+brew tap mattt/tap
+brew trust --cask mattt/tap/imcp
+{{- end }}
 
 brew bundle --no-upgrade --file="{{ .chezmoi.sourceDir }}/packages/Brewfile"
 {{- range .groups }}
@@ -49,6 +53,12 @@ if command -v claude >/dev/null 2>&1; then
   claude mcp remove chrome-devtools -s user >/dev/null 2>&1 || true
   claude mcp add chrome-devtools -s user -- \
     {{ .mcp.chrome_devtools.command | quote }}{{ range .mcp.chrome_devtools.args }} {{ . | quote }}{{ end }}
+fi
+{{- end }}
+{{- if and (index .install "claude") (index .install "imcp") }}
+if command -v claude >/dev/null 2>&1; then
+  claude mcp remove iMCP -s user >/dev/null 2>&1 || true
+  claude mcp add iMCP -s user -- {{ .mcp.imcp.command | quote }}
 fi
 {{- end }}
 

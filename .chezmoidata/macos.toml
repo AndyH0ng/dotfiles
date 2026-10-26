@@ -62,8 +62,8 @@ key = "DSDontWriteUSBStores"
 value = true
 
 # default apps (duti), only where the app's optional group is installed.
-# An extension without a registered UTI (dyn.*: cts, jsx, cjs, jsonc, scss) can't be set.
+# An extension without a registered UTI (dyn.*: cts, jsx, cjs, jsonc, scss, tsx, mdx, toml) can't be set.
 [[macos.default_apps]]
 app = "com.jetbrains.air"
 group = "ide"
-extensions = ["ts", "tsx", "mts", "js", "mjs", "json", "md", "mdx", "yaml", "yml", "toml", "css", "sh", "zsh"]
+extensions = ["ts", "mts", "js", "mjs", "json", "md", "yaml", "yml", "css", "sh", "zsh"]

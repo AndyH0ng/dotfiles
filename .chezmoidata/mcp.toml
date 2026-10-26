@@ -2,3 +2,7 @@
 [mcp.chrome_devtools]
 command = "bunx"
 args = ["chrome-devtools-mcp@latest", "--autoConnect", "--channel", "canary", "--no-usage-statistics"]
+
+# Bundled in the iMCP app (packages/Brewfile.imcp). Shared by Claude Code and Codex.
+[mcp.imcp]
+command = "/Applications/iMCP.app/Contents/MacOS/imcp-server"

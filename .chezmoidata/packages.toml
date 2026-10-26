@@ -22,6 +22,10 @@ name = "canary"
 description = "Chrome Canary and the chrome-devtools MCP for Claude Code/Codex"
 
 [[groups]]
+name = "imcp"
+description = "iMCP app and its MCP server for Claude Code/Codex access to Apple app data"
+
+[[groups]]
 name = "apps"
 description = "AdGuard/Notion/LaunchOS/Figma"
 

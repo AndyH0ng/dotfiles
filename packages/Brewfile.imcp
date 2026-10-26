@@ -1,0 +1,2 @@
+tap "mattt/tap"
+cask "mattt/tap/imcp"   # MCP server for Claude Code/Codex (bundled in the app)
