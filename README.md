@@ -13,7 +13,7 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply --source ~/dotfiles AndyH0n
 
 - [packages/Brewfile.claude](packages/Brewfile.claude): Claude Code와 설정·상태바, 에이전트 `rm` → 휴지통, 작업 중 잠자기 방지
 - [packages/Brewfile.codex](packages/Brewfile.codex): Codex CLI와 설정·전역 지침, 에이전트 `rm` → 휴지통, 작업 중 잠자기 방지. Claude와 독립적으로 선택 가능
-- [packages/Brewfile.ide](packages/Brewfile.ide): WebStorm, IntelliJ, 코드 파일 기본 앱을 WebStorm으로
+- [packages/Brewfile.ide](packages/Brewfile.ide): JetBrains Air와 코드 파일 기본 앱을 Air로
 - [packages/Brewfile.dev](packages/Brewfile.dev): OrbStack
 - [packages/Brewfile.canary](packages/Brewfile.canary): Chrome Canary, claude 또는 codex도 켜면 각 클라이언트에 chrome-devtools MCP 등록
 - [packages/Brewfile.apps](packages/Brewfile.apps): AdGuard, Notion, LaunchOS, Figma
@@ -31,7 +31,7 @@ Git 이름과 이메일은 최초 `chezmoi init`에서 입력한다. 기존 Git 
 - **Git**: 최신 기본값(histogram diff, zdiff3, rerere, autoSetupRemote), pager로 [delta](https://github.com/dandavison/delta) 사용(lazygit 포함), [mergiraf](https://mergiraf.org)로 구문 기반 merge(TS·JSON·YAML 등), 서명 키가 있을 때만 SSH 커밋 서명
 - **Claude Code**: `settings.json`(플러그인, 테마, 상태바)과 base16-snazzy [상태바](dot_claude/executable_statusline.sh.tmpl), canary 그룹이면 실행 중인 Chrome Canary에 붙는 chrome-devtools MCP(`chrome://inspect/#remote-debugging`에서 원격 디버깅을 켜야 함)
 - **Codex**: CLI와 전역 `AGENTS.md`, [`codex.toml`](.chezmoidata/codex.toml)의 관리 설정을 `~/.codex/config.toml`에 병합한다. 모델 선택·프로젝트 신뢰·개인 MCP·인증 설정은 로컬에 유지한다. 비로그인 셸에서도 Homebrew와 mise 런타임을 사용할 수 있다
-- **macOS 설정**: 키 반복, 텍스트 자동 치환 끄기, Finder 경로 막대, 네트워크·USB에 `.DS_Store` 안 만들기, ide 그룹이면 코드 파일 기본 앱을 WebStorm으로(duti) 등. 목록은 [`.chezmoidata/macos.toml`](.chezmoidata/macos.toml) 한 곳에 있다
+- **macOS 설정**: 키 반복, 텍스트 자동 치환 끄기, Finder 경로 막대, 네트워크·USB에 `.DS_Store` 안 만들기, ide 그룹이면 코드 파일 기본 앱을 Air로(duti) 등. 목록은 [`.chezmoidata/macos.toml`](.chezmoidata/macos.toml) 한 곳에 있다
 - **프라이버시**: Homebrew, gh, Claude Code, Codex, CodeRabbit, 주요 JS 도구의 텔레메트리 끔. 목록은 [`.chezmoidata/telemetry.toml`](.chezmoidata/telemetry.toml) 한 곳에 있다
 
 ## 수정하기
@@ -45,6 +45,7 @@ chezmoi는 심링크 모드로 동작한다. `~/.zshrc` 같은 일반 파일은 
 - **머신 전용 설정·비밀값**: `~/.zshrc.local`, `~/.zshenv.local`에 둔다(있으면 자동으로 source하며 git에는 들어가지 않는다). `~/.zshrc`는 공개 저장소로 연결된 심링크다.
 - **Claude Code 설정**: `~/.claude/settings.json`은 [`claude-settings.json`](claude-settings.json)으로부터 `modify_` 스크립트가 생성한다. 이 스크립트는 머신별 `autoMode` 블록을 git 밖에 둔다. `/config`로 설정을 바꿨다면 `claude-sync`로 저장소에 다시 반영한다.
 - **Codex 설정**: 공개 기본값은 [`.chezmoidata/codex.toml`](.chezmoidata/codex.toml), 텔레메트리는 [`telemetry.toml`](.chezmoidata/telemetry.toml), Canary MCP 명령은 [`mcp.toml`](.chezmoidata/mcp.toml)에 있다. `chezmoi apply`는 이 키만 갱신하고 기존 개인 설정과 주석은 보존한다. 기존 Mac에서 Codex 지원을 켜려면 `chezmoi init`에서 codex를 선택한 뒤 `chezmoi apply`한다. 최초 로그인은 직접 `codex login`으로 한다.
+- **Air + Claude Code**: ide와 claude 그룹을 함께 켜면 [로컬 ACP 브리지](scripts/air/bridge.py)와 [UI 패치](scripts/air/src/airui2/Agent.java)를 설치한다. 기존 Claude Code 로그인을 사용하며 Air의 ACP·MCP·기타 개인 설정은 보존한다. 모델·모드·추론 강도 선택, 세션 재개, Context 사용량과 5시간·주간 사용량 표시를 지원한다. UI 패치는 Air 내부 구현에 의존하므로 Air 업데이트 후 다시 확인해야 한다.
 
 Claude 또는 Codex 그룹을 켜면 에이전트 셸의 `rm`이 휴지통을 사용한다. 전역 작업 지침은 [`agents.toml`](.chezmoidata/agents.toml) 한 곳에서 정의하고, `chezmoi apply`가 양쪽 클라이언트의 관리 블록을 갱신한다. 블록 밖의 기존 개인 지침은 보존한다. 잠자기 guard도 두 클라이언트가 공유한다. Codex는 실험 기능인 `prevent_idle_sleep`을 켜고, guard가 실제 macOS 잠자기 방지 요청을 감지한다. guard의 시스템 설치는 처음 한 번 실제 터미널에서 `chezmoi apply`로 sudo 승인이 필요하다.
 

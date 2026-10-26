@@ -11,7 +11,7 @@ description = "Codex CLI with managed settings/agent rm to Trash/sleep guard"
 
 [[groups]]
 name = "ide"
-description = "WebStorm/IntelliJ and code files opening in WebStorm"
+description = "JetBrains Air and code files opening in Air"
 
 [[groups]]
 name = "dev"

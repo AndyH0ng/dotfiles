@@ -18,6 +18,8 @@ zsh -n dot_zshenv dot_zprofile dot_zshrc dot_local/agent-bin/executable_rm || st
 actionlint || status=1
 zizmor --offline --quiet .github/workflows || status=1
 ruff check scripts || status=1
+shellcheck scripts/air/build.sh || status=1
 uv run --script scripts/test_agents.py || status=1
+uv run --script scripts/test_air.py || status=1
 
 exit "$status"

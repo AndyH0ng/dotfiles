@@ -1,0 +1,5 @@
+#!/bin/bash
+set -euo pipefail
+{{- if and (index .install "ide") (index .install "claude") }}
+/opt/homebrew/bin/python3 {{ .chezmoi.sourceDir | quote }}/scripts/air/setup.py
+{{- end }}
