@@ -6,6 +6,7 @@ java = "temurin-21"
 node = "lts"
 pnpm = "latest"
 python = "3.14.7"
+rust = "stable"
 
 [settings]
 lockfile_platforms = ["macos-arm64"]
