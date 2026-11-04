@@ -53,7 +53,6 @@ def render(current, data, telemetry_only=False):
         servers = doc.get("mcp_servers", {})
         for group, name, key in (
             ("canary", "chrome-devtools", "chrome_devtools"),
-            ("imcp", "iMCP", "imcp"),
             ("safari", "safari-mcp", "safari"),
         ):
             spec = data["mcp"][key]

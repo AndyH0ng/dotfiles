@@ -20,7 +20,6 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply --source ~/dotfiles AndyH0n
 | [ide](packages/Brewfile.ide) | VS Code, 테마·아이콘·Custom UI Style | 코드 파일 기본 앱을 VS Code로 |
 | [dev](packages/Brewfile.dev) | OrbStack | |
 | [canary](packages/Brewfile.canary) | Chrome Canary | chrome-devtools MCP 등록 |
-| [imcp](packages/Brewfile.imcp) | iMCP | MCP 등록, 앱에서 권한 승인 |
 | [safari](packages/Brewfile.safari) | 없음 (Safari 27 내장) | Safari MCP 등록 |
 | [apps](packages/Brewfile.apps) | wBlock, Notion, LaunchOS, Figma | |
 | [fonts](packages/Brewfile.fonts) | SF 폰트, LigaSFMono Nerd Font | 비공개 tap, `gh` 로그인 필요 |

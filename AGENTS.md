@@ -19,7 +19,7 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 | `.chezmoidata/packages.toml` | **Only** place optional packages/Brewfile groups are defined |
 | `.chezmoidata/telemetry.toml` | **Only** place telemetry opt-outs are defined (env vars, Claude env, per-tool commands + checks) |
 | `.chezmoidata/codex.toml` | Public Codex settings; merge only these keys into the private config |
-| `.chezmoidata/mcp.toml` | Shared Chrome DevTools / iMCP / Safari MCP transports for both clients |
+| `.chezmoidata/mcp.toml` | Shared Chrome DevTools / Safari MCP transports for both clients |
 | `.chezmoidata/agents.toml` | Shared global instructions rendered into Claude CLAUDE.md and Codex AGENTS.md |
 | `scripts/codex_config.py` | TOML-preserving Codex config merger, run by uv with a pinned tomlkit dependency |
 | `Library/Application Support/Code/User/`, `dot_config/vscode/` | VS Code settings/keybindings and the CSS/JS that Custom UI Style injects (ide group) |
