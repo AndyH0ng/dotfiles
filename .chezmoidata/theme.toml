@@ -25,20 +25,20 @@ base0F = "b2643c"
 
 # Fallback order. `name` must match `ghostty +list-fonts` exactly, and each
 # cask must also be in packages/Brewfile (it can't be templated).
+# Locally built fonts use manual = true; their binaries are not distributed.
 [theme.font]
 size = 14
+style = "Light"
+style_italic = "Light Italic"
+features = ["-calt"]
 
 [[theme.font.families]]
-name = "IBM Plex Mono"            # Latin
-cask = "font-ibm-plex-mono"
+name = "LigaSFMono Nerd Font"     # Latin and icons; built locally from Apple fonts
+manual = true
 
 [[theme.font.families]]
-name = "D2Coding"                 # Hangul
-cask = "font-d2coding"
-
-[[theme.font.families]]
-name = "Symbols Nerd Font Mono"   # icons
-cask = "font-symbols-only-nerd-font"
+name = "Pretendard"               # Hangul
+cask = "font-pretendard"
 
 # VS Code chrome around the blurred (vibrancy) window; values measured on screen.
 [theme.vscode]

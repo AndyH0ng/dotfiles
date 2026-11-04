@@ -22,6 +22,11 @@ background = #{{ .theme.background }}
 font-family = {{ .name }}
 {{- end }}
 font-size = {{ .theme.font.size }}
+font-style = {{ .theme.font.style }}
+font-style-italic = {{ .theme.font.style_italic }}
+{{- range .theme.font.features }}
+font-feature = {{ . }}
+{{- end }}
 
 background-opacity = 0.85
 background-blur = true

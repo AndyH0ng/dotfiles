@@ -1,5 +1,4 @@
 # UI fonts (terminal fonts are in packages/Brewfile)
-cask "font-pretendard"
 cask "font-sf-pro"
 cask "font-sf-mono"
 cask "font-sf-compact"

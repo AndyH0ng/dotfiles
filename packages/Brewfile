@@ -37,6 +37,4 @@ brew "zizmor"
 
 # terminal + fonts
 cask "ghostty"
-cask "font-ibm-plex-mono"
-cask "font-d2coding"
-cask "font-symbols-only-nerd-font"
+cask "font-pretendard"
