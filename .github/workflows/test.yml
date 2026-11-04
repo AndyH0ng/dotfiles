@@ -67,7 +67,10 @@ jobs:
           for f in packages/Brewfile.*; do
             echo "== $f"
             formulae=$(brew bundle list --file "$f" --formula | xargs)
-            casks=$(brew bundle list --file "$f" --cask | xargs)
+            # andyh0ng/tap is private (fonts built from Apple fonts), so CI can't resolve it;
+            # brew bundle list prints short names, so take them from the Brewfile itself
+            private=$(sed -n 's|^cask "andyh0ng/tap/\([^"]*\)".*|\1|p' "$f")
+            casks=$(brew bundle list --file "$f" --cask | grep -vxF "$private" | xargs)
             # shellcheck disable=SC2086 # split into one arg per package on purpose
             [ -z "$formulae" ] || brew info --json=v2 --formula $formulae >/dev/null
             # shellcheck disable=SC2086
