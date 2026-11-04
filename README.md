@@ -17,7 +17,7 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply --source ~/dotfiles AndyH0n
 - [packages/Brewfile.dev](packages/Brewfile.dev): OrbStack
 - [packages/Brewfile.canary](packages/Brewfile.canary): Chrome Canary, claude 또는 codex도 켜면 각 클라이언트에 chrome-devtools MCP 등록
 - [packages/Brewfile.imcp](packages/Brewfile.imcp): iMCP, claude 또는 codex도 켜면 각 클라이언트에 MCP 등록. 앱 실행 후 사용할 서비스를 켜고 macOS 권한과 클라이언트 연결을 승인한다.
-- [packages/Brewfile.apps](packages/Brewfile.apps): AdGuard, Notion, LaunchOS, Figma
+- [packages/Brewfile.apps](packages/Brewfile.apps): wBlock, Notion, LaunchOS, Figma
 - [packages/Brewfile.fonts](packages/Brewfile.fonts): Pretendard, SF
 
 Git 이름과 이메일은 최초 `chezmoi init`에서 입력한다. 기존 Git 설정이 있으면 기본값으로 제안하며, 입력값은 이 Mac의 chezmoi 설정에만 저장한다.
