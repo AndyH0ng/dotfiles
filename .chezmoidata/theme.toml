@@ -25,7 +25,7 @@ base0F = "b2643c"
 
 # Fallback order. `name` must match `ghostty +list-fonts` exactly, and each
 # cask must also be in packages/Brewfile (it can't be templated).
-# Locally built fonts use manual = true; their binaries are not distributed.
+# A cask may live in an optional group Brewfile instead (e.g. a font from a private release).
 [theme.font]
 size = 14
 style = "Light"
@@ -33,8 +33,8 @@ style_italic = "Light Italic"
 features = ["-calt"]
 
 [[theme.font.families]]
-name = "LigaSFMono Nerd Font"     # Latin and icons; built locally from Apple fonts
-manual = true
+name = "LigaSFMono Nerd Font"     # Latin and icons; built from Apple fonts, private release
+cask = "andyh0ng/tap/font-liga-sf-mono-nerd-font"   # packages/Brewfile.fonts
 
 [[theme.font.families]]
 name = "Pretendard"               # Hangul

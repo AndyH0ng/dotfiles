@@ -1,4 +1,7 @@
-# UI fonts (terminal fonts are in packages/Brewfile)
+# UI fonts, plus the terminal font that downloads from a private release
+# (needs HOMEBREW_GITHUB_API_TOKEN; the install script takes it from `gh auth token`)
+tap "andyh0ng/tap"
+cask "andyh0ng/tap/font-liga-sf-mono-nerd-font"
 cask "font-sf-pro"
 cask "font-sf-mono"
 cask "font-sf-compact"

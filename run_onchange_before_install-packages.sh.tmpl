@@ -27,6 +27,15 @@ brew trust --formula tinted-theming/tinted/tinty
 brew tap mattt/tap
 brew trust --cask mattt/tap/imcp
 {{- end }}
+{{- if index .install "fonts" }}
+brew tap andyh0ng/tap
+brew trust --cask andyh0ng/tap/font-liga-sf-mono-nerd-font
+# that font downloads from a private GitHub release
+if [ -z "${HOMEBREW_GITHUB_API_TOKEN:-}" ] && gh auth status >/dev/null 2>&1; then
+  HOMEBREW_GITHUB_API_TOKEN=$(gh auth token)
+  export HOMEBREW_GITHUB_API_TOKEN
+fi
+{{- end }}
 
 brew bundle --no-upgrade --file="{{ .chezmoi.sourceDir }}/packages/Brewfile"
 {{- range .groups }}
