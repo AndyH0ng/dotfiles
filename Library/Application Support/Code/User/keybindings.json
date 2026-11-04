@@ -1,0 +1,5 @@
+[
+  // Ctrl+Tab: 목록 없이 최근 파일로 바로 전환 (누를 때마다 한 칸씩, 코드를 보면서 넘김)
+  { "key": "ctrl+tab", "command": "workbench.action.openPreviousRecentlyUsedEditor" },
+  { "key": "ctrl+shift+tab", "command": "workbench.action.openNextRecentlyUsedEditor" }
+]

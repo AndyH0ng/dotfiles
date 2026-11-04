@@ -1,0 +1,233 @@
+{{- $p := .theme.palette }}
+{{- $v := .theme.vscode }}
+{{- $mono := (index .theme.font.families 0).name }}
+{{- $kr := (index .theme.font.families 1).name -}}
+{
+  // ── 크기 ──
+  "window.zoomLevel": 1,
+  "editor.fontSize": 13,
+  "editor.lineHeight": 1.6,
+  "terminal.integrated.fontSize": 13,
+
+  // ── 테마: Snazzy + 터미널 16색은 Ghostty와 동일 (dotfiles theme.toml 기준)
+  //    영역 배경은 전부 투명, 창 바탕 한 겹만 #{{ .theme.background }} 85% (custom.css) → 블러가 균일하게 비침 ──
+  "workbench.colorTheme": "Snazzy",
+  "workbench.iconTheme": "symbols",            // 파일 아이콘: Symbols (단순한 선 아이콘)
+  // 네이티브 외관을 다크로 고정: OS가 라이트여도 블러(vibrancy)가 흰 유리 대신 어두운 유리로 그려짐
+  "window.systemColorTheme": "dark",
+  "workbench.colorCustomizations": {
+    // 포커스 시 파란 테두리 제거 (hover 정보 창, 입력창, 버튼, 리스트 등) — 테마와 무관하게 적용
+    "focusBorder": "#00000000",
+    "statusBar.focusBorder": "#00000000",
+    "git.blame.editorDecorationForeground": "#{{ $p.base03 }}99",
+    // 괄호 짝: 박스 테두리 대신 Snazzy 파랑 글자 + 옅은 파랑 배경
+    "editorBracketMatch.foreground": "#{{ $p.base0D }}",
+    "editorBracketMatch.background": "#{{ $p.base0D }}33",
+    "editorBracketMatch.border": "#00000000",
+    "statusBarItem.focusBorder": "#00000000",
+    "list.focusOutline": "#00000000",
+    "list.focusAndSelectionOutline": "#00000000",
+    "list.inactiveFocusOutline": "#00000000",
+    "[Snazzy]": {
+      "editor.background": "#00000000",
+      "editorGutter.background": "#00000000",
+      "sideBar.background": "#00000000",
+      "sideBarSectionHeader.background": "#00000000",
+      "activityBar.background": "#00000000",
+      "panel.background": "#00000000",
+      "terminal.background": "#00000000",
+      "titleBar.activeBackground": "#00000000",
+      "titleBar.inactiveBackground": "#00000000",
+      "statusBar.background": "#{{ $v.chrome }}",
+      "statusBar.noFolderBackground": "#{{ $v.chrome }}",
+      // 하단바를 상단바와 같은 스타일로: 상단바는 macOS 제목줄 재질(#{{ $v.chrome }}, 측정값)이라 solid →
+      // 하단바도 같은 색으로 불투명하게 + 상단바 글자색, 색 배경 항목 제거
+      "statusBar.foreground": "#{{ $v.chrome_foreground }}",
+      "statusBar.noFolderForeground": "#{{ $v.chrome_foreground }}",
+      "statusBar.debuggingBackground": "#{{ $v.chrome }}",
+      "statusBar.debuggingForeground": "#{{ $v.chrome_foreground }}",
+      "statusBarItem.remoteBackground": "#00000000",
+      "statusBarItem.remoteForeground": "#{{ $v.chrome_foreground }}",
+      "statusBarItem.offlineBackground": "#00000000",
+      "statusBarItem.prominentBackground": "#00000000",
+      "statusBarItem.errorBackground": "#00000000",
+      "statusBarItem.warningBackground": "#00000000",
+      "editorGroupHeader.tabsBackground": "#00000000",
+      "tab.activeBackground": "#00000000",
+      "tab.inactiveBackground": "#00000000",
+      "breadcrumb.background": "#00000000",
+      "sideBar.border": "#{{ $p.base07 }}0f",
+      "panel.border": "#{{ $p.base07 }}0f",
+      "titleBar.border": "#{{ $p.base07 }}0f",
+      "statusBar.border": "#{{ $p.base07 }}0f",
+      "editorGroup.border": "#{{ $p.base07 }}0f",
+      "terminal.foreground": "#{{ $p.base05 }}",
+      "terminal.ansiBlack": "#{{ $p.base00 }}",
+      "terminal.ansiRed": "#{{ $p.base08 }}",
+      "terminal.ansiGreen": "#{{ $p.base0B }}",
+      "terminal.ansiYellow": "#{{ $p.base0A }}",
+      "terminal.ansiBlue": "#{{ $p.base0D }}",
+      "terminal.ansiMagenta": "#{{ $p.base0E }}",
+      "terminal.ansiCyan": "#{{ $p.base0C }}",
+      "terminal.ansiWhite": "#{{ $p.base05 }}",
+      "terminal.ansiBrightBlack": "#{{ $p.base03 }}",
+      "terminal.ansiBrightRed": "#{{ $p.base08 }}",
+      "terminal.ansiBrightGreen": "#{{ $p.base0B }}",
+      "terminal.ansiBrightYellow": "#{{ $p.base0A }}",
+      "terminal.ansiBrightBlue": "#{{ $p.base0D }}",
+      "terminal.ansiBrightMagenta": "#{{ $p.base0E }}",
+      "terminal.ansiBrightCyan": "#{{ $p.base0C }}",
+      "terminal.ansiBrightWhite": "#{{ $p.base07 }}"
+    }
+  },
+
+  // ── 폰트 ──
+  "editor.fontFamily": "'{{ $mono }}', 'Pretendard Fallback', '{{ $kr }}', monospace",
+  "editor.fontWeight": "300",
+  "editor.fontLigatures": true,
+  "editor.inlayHints.fontFamily": "'{{ $mono }}'",
+  "editor.codeLensFontFamily": "'{{ $mono }}'",
+  "terminal.integrated.fontFamily": "'{{ $mono }}', 'Pretendard Fallback', '{{ $kr }}'",
+  "terminal.integrated.fontWeight": "300",
+  "terminal.integrated.fontLigatures.enabled": false,
+  // ── 터미널: Ghostty처럼 깔끔하게 ──
+  "terminal.integrated.cursorStyle": "block",                   // Ghostty: cursor-style = block
+  "terminal.integrated.cursorBlinking": false,                  // Ghostty: cursor-style-blink = false
+  "terminal.integrated.minimumContrastRatio": 1,                // 색 자동 보정 끔 → Snazzy 팔레트 그대로
+  "terminal.integrated.shellIntegration.decorationsEnabled": "never",  // 명령 옆 동그라미 표시 끔
+  "terminal.integrated.stickyScroll.enabled": false,            // 위에 붙는 이전 명령 줄 끔
+  "terminal.integrated.initialHint": false,                     // 빈 터미널의 채팅 안내 문구 끔
+  "terminal.integrated.showExitAlert": false,                   // 종료 코드 알림 끔
+  "terminal.integrated.tabs.hideCondition": "singleTerminal",  // 터미널 1개일 땐 오른쪽 목록 숨김
+  "terminal.integrated.tabs.showActions": "never",
+  "workbench.panel.showLabels": false,                          // 패널 탭(문제·출력·터미널)을 아이콘만
+  "debug.console.fontFamily": "'{{ $mono }}'",
+  "scm.inputFontFamily": "'{{ $mono }}'",
+
+  // ── 창 / 레이아웃 ──
+  // Modern UI는 내장 터미널의 한글 조합 팝오버를 커서에서 떨어뜨려 띄움 → 끔
+  "workbench.experimental.modernUI": false,
+  "window.commandCenter": false,
+  "workbench.layoutControl.enabled": false,
+  "workbench.activityBar.location": "top",
+  "workbench.editor.showTabs": "none",
+  "workbench.editor.editorActionsLocation": "hidden",
+  "workbench.tips.enabled": false,
+  "workbench.editor.useModal": "some",               // 설정·단축키·확장 상세 등을 에디터 위 떠 있는 창으로 (Esc로 닫기)
+  "extensions.allowOpenInModalEditor": true,
+  "workbench.tree.stickyScrollMaxItemCount": 3,   // 탐색기 고정 줄 최대 3개 (기본 7)
+
+  // ── 에디터 ──
+  "editor.minimap.enabled": false,
+  "editor.glyphMargin": false,            // 줄 번호 왼쪽 브레이크포인트·글리프 칸 끔
+  "editor.lineDecorationsWidth": 10,
+  "editor.showFoldingControls": "never",
+  "breadcrumbs.enabled": false,
+  "editor.stickyScroll.enabled": false,
+  "editor.renderWhitespace": "none",
+  "editor.renderLineHighlight": "none",
+  // 부드러운 움직임: 커서가 미끄러지듯 이동 + 스크롤·목록 부드럽게
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.cursorBlinking": "smooth",            // 깜빡임도 페이드로
+  "editor.smoothScrolling": true,
+  "workbench.list.smoothScrolling": true,
+  "terminal.integrated.smoothScrolling": true,
+  // Tailwind Fold: 긴 class/className 값을 접어서 표시, 커서가 있는 줄은 펼침
+  "tailwind-fold.foldStyle": "QUOTES",          // 따옴표는 남기고 안쪽만 접음: className="…"
+  "tailwind-fold.foldedText": "…",
+  "tailwind-fold.foldedTextColor": "#{{ $p.base03 }}",   // Snazzy base03 (흐린 회색)
+  "tailwind-fold.foldedTextBackgroundColor": "#00000000",
+  "tailwind-fold.showTailwindImage": false,     // 접힌 자리의 Tailwind 로고 숨김
+  "tailwind-fold.unfoldIfLineSelected": true,
+  "tailwind-fold.foldLengthThreshold": 30,      // 30자 이하 짧은 클래스는 접지 않음
+
+  // 인라인 Git blame: 커서 줄 끝에 작성자·시점·커밋 제목을 흐리게 (VS Code 내장)
+  // Import Cost: import 옆에 번들 크기 (gzip 기준), 색은 Snazzy 톤
+  "importCost.bundleSizeDecoration": "gzipped",
+  "importCost.showCalculatingDecoration": false,
+  "importCost.smallPackageDarkColor": "#{{ $p.base03 }}",
+  "importCost.mediumPackageDarkColor": "#{{ $p.base0A }}",
+  "importCost.largePackageDarkColor": "#{{ $p.base08 }}",
+
+  "git.blame.editorDecoration.enabled": true,
+  "git.blame.editorDecoration.template": "${authorName}, ${authorDateAgo} · ${subject}",
+
+  "editor.scrollBeyondLastLine": false,   // 마지막 줄 아래 한 화면만큼 더 스크롤되는 것 끔
+  "editor.scrollBeyondLastColumn": 0,     // 가장 긴 줄 오른쪽 여분 스크롤 끔
+  "editor.guides.indentation": false,
+  "editor.guides.bracketPairs": false,
+  "editor.matchBrackets": "near",
+  "editor.overviewRulerBorder": false,
+  "editor.hideCursorInOverviewRuler": true,
+  "editor.scrollbar.vertical": "auto",
+  "editor.scrollbar.verticalScrollbarSize": 8,
+  "editor.scrollbar.horizontalScrollbarSize": 8,
+  "editor.occurrencesHighlight": "off",
+  "editor.inlayHints.enabled": "offUnlessPressed",
+  "editor.unicodeHighlight.allowedLocales": { "ko": true, "en": true },
+  "editor.unicodeHighlight.nonBasicASCII": false,
+  "editor.unicodeHighlight.ambiguousCharacters": false,
+
+  // ── 내장 AI (Copilot / Chat) 끄기 ──
+  "chat.disableAIFeatures": true,
+  "chat.commandCenter.enabled": false,
+  "chat.mcp.access": "none",
+
+  // ── 소음 끄기 ──
+  "workbench.startupEditor": "none",
+  "workbench.welcomePage.walkthroughs.openOnInstall": false,
+  "update.showReleaseNotes": false,
+  "extensions.ignoreRecommendations": true,
+  "telemetry.telemetryLevel": "off",
+  "git.openRepositoryInParentFolders": "never",
+  "explorer.confirmDragAndDrop": false,
+
+  // ── 레이아웃 ──
+  "workbench.sideBar.location": "right",
+
+  // ── Claude Code 작업용 ──
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "diffEditor.renderSideBySide": true,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "terminal.integrated.scrollback": 10000,
+
+  // ── 편집 기본기 ──
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+
+  // ── APC Customize UI++ (drcika.apc-extension) ──
+  "apc.font.family": "'SF Pro', '{{ $kr }}', -apple-system",
+  "apc.monospace.font.family": "'SF Mono'",
+  "apc.header": { "height": 40 },
+  "apc.electron": {
+    "titleBarStyle": "hiddenInset",
+    "trafficLightPosition": { "x": 16, "y": 17 }
+  },
+  "apc.imports": ["${userHome}/.config/vscode/custom.css"],
+
+  // ── Custom UI Style (subframe7536.custom-ui-style) — ESM 대응 ──
+  "custom-ui-style.font.sansSerif": "'SF Pro', '{{ $kr }}', -apple-system",
+  // macOS 블러: 창 배경을 투명하게 하고 NSVisualEffectView(vibrancy)를 깔아 Ghostty처럼 뒤가 비침
+  "custom-ui-style.electron": {
+    "vibrancy": "under-window",
+    "visualEffectState": "active",
+    "backgroundColor": "#00000000"
+  },
+  "custom-ui-style.external.imports": [
+    "file://${userHome}/.config/vscode/custom.css",
+    "file://${userHome}/.config/vscode/custom.js"
+  ],
+  "claudeCode.useTerminal": true,
+  "json.schemaDownload.trustedDomains": {
+    "https://schemastore.azurewebsites.net/": true,
+    "https://raw.githubusercontent.com/microsoft/vscode/": true,
+    "https://raw.githubusercontent.com/devcontainers/spec/": true,
+    "https://www.schemastore.org/": true,
+    "https://json.schemastore.org/": true,
+    "https://spec.openapis.org/": true,
+    "https://json-schema.org/": true,
+    "https://developer.microsoft.com/json-schemas/": true,
+    "https://biomejs.dev": true
+  }
+}

@@ -1,0 +1,183 @@
+{{- $p := .theme.palette }}
+{{- $v := .theme.vscode }}
+{{- $mono := (index .theme.font.families 0).name }}
+{{- $kr := (index .theme.font.families 1).name -}}
+/* 둥근 모서리 — VS Code 내부 위젯 */
+:root {
+  --r-lg: 14px; --r-md: 10px; --r-sm: 6px;
+  /* 호버 배경: 모든 버튼·리스트가 같은 radius, 사이드바 가장자리에서 같은 간격 */
+  --r-hover: 6px; --hover-inset: 4px;
+}
+
+/* 명령 팔레트 / Quick Open */
+.quick-input-widget { border-radius: var(--r-lg) !important; overflow: hidden; }
+.quick-input-list .monaco-list-row { border-radius: var(--r-hover) !important; }
+
+/* 자동완성, 호버, 찾기, 파라미터 힌트 */
+.monaco-editor .suggest-widget,
+.monaco-editor .suggest-details,
+.monaco-hover,
+.monaco-editor .find-widget,
+.monaco-editor .parameter-hints-widget,
+.monaco-editor .peekview-widget { border-radius: var(--r-md) !important; overflow: hidden; }
+
+/* 컨텍스트 메뉴 */
+.context-view .monaco-menu,
+.monaco-menu-container .monaco-scrollable-element { border-radius: var(--r-md) !important; }
+.monaco-menu .action-item .action-menu-item { border-radius: var(--r-hover) !important; }
+
+/* 알림 토스트 */
+.notification-toast { border-radius: var(--r-md) !important; overflow: hidden; }
+
+/* 입력창, 버튼, 드롭다운 */
+.monaco-inputbox,
+.monaco-select-box,
+.monaco-button { border-radius: var(--r-sm) !important; }
+
+/* ── 호버 배경 통일 ── */
+
+/* 툴바 버튼 (제목 줄 …, 새 파일, 새로고침 등) */
+.monaco-workbench .monaco-action-bar .action-item .action-label { border-radius: var(--r-hover) !important; }
+
+/* 사이드바 상단 아이콘 (탐색기·검색·Git…): Classic UI엔 호버 배경이 없어서 추가.
+   VS Code가 이 라벨의 background를 !important로 투명하게 고정하므로 box-shadow로 칠함:
+   inset으로 안을 채우고, 바깥 2px로 넓혀서 레이아웃은 그대로, 바깥 radius = --r-hover */
+.monaco-workbench .pane-composite-part .composite-bar .action-item:hover .action-label {
+  border-radius: calc(var(--r-hover) - 2px) !important;
+  box-shadow: inset 0 0 0 99px var(--vscode-toolbar-hoverBackground),
+              0 0 0 2px var(--vscode-toolbar-hoverBackground);
+}
+
+/* 사이드바·패널 리스트 행: 호버·선택 배경을 가장자리에서 --hover-inset만큼 안쪽으로.
+   배경을 content-box로 자르면 안쪽 radius = border-radius - padding. 패딩은 좌우에만 있으므로
+   가로/세로를 따로 지정해야 원형 모서리(--r-hover)가 됨 (같은 값이면 타원 → 스퀘어클처럼 보임) */
+.monaco-workbench .pane-composite-part .monaco-list .monaco-list-row {
+  box-sizing: border-box;
+  padding-inline: var(--hover-inset);
+  background-clip: content-box;
+  border-radius: calc(var(--r-hover) + var(--hover-inset)) / var(--r-hover);
+}
+
+/* 그 밖의 리스트 (설정, 확장 상세 등) */
+.monaco-list .monaco-list-row { border-radius: var(--r-hover); }
+
+/* 한글 폴백 전용 Pretendard: editor.fontWeight(300)와 무관하게 Regular/Bold 고정 */
+@font-face {
+  font-family: 'Pretendard Fallback';
+  src: local('{{ $kr }} Regular'), local('{{ $kr | replace " " "" }}-Regular');
+  font-weight: 100 599;
+}
+@font-face {
+  font-family: 'Pretendard Fallback';
+  src: local('{{ $kr }} Bold'), local('{{ $kr | replace " " "" }}-Bold');
+  font-weight: 600 900;
+}
+
+/* 오른쪽 위 툴바 (계정·설정): macOS에서 VS Code가 right:8px + padding-right:4px을 줘서
+   마지막 아이콘 오른쪽만 12px로 넓음 → 아이콘 사이 간격과 맞춤 */
+.monaco-workbench.mac:not(.web) .part.titlebar > .titlebar-container > .titlebar-right > .action-toolbar-container {
+  right: 0 !important;
+  padding-right: 6px !important;
+}
+
+/* 블러(vibrancy): 배경은 창 바탕 한 겹에만 칠함 (Ghostty background #{{ .theme.background }}; 0.55 because vibrancy desaturates more than Ghostty's blur).
+   VS Code는 같은 배경을 영역마다 여러 겹 칠해서, 겹마다 85%면 합쳐서 거의 불투명해짐.
+   영역 배경은 settings의 colorCustomizations에서 전부 투명으로 둠. */
+html, body, .monaco-workbench .monaco-grid-view { background-color: transparent !important; }
+.monaco-workbench { background-color: #{{ .theme.background }}8c !important; }
+
+/* 탐색기 등 트리의 고정 스크롤(상위 폴더가 위에 붙는 줄): 사이드바가 투명이라 아래 행이 비침
+   → 고정 줄은 사이드바 폭을 꽉 채우는 불투명한 띠로, 색은 화면에서 잰 사이드바 색(#{{ $v.header }})
+     (리스트 행의 안쪽 여백·라운드는 해제).
+   컨테이너는 높이 0이고 줄들이 절대 위치라 줄에 직접 칠함. 호버는 그 위에 겹쳐 칠함 */
+.monaco-workbench .monaco-tree-sticky-container .monaco-tree-sticky-row {
+  background-color: #{{ $v.header }} !important;
+  background-clip: border-box !important;
+  border-radius: 0 !important;
+}
+.monaco-workbench .monaco-tree-sticky-container .monaco-tree-sticky-row:hover {
+  background: linear-gradient(var(--vscode-list-hoverBackground), var(--vscode-list-hoverBackground)),
+              #{{ $v.header }} !important;
+}
+
+/* ── 스크롤 가장자리: 짧고 진한 3px 그림자 → 배경색에서 투명으로 사라지는 페이드 ──
+   (탐색기 고정 줄 아래 페이드와 같은 방식. 색은 화면에서 잰 사이드바·에디터 배경 #{{ $v.header }})
+   VS Code는 위쪽(세로 스크롤)·왼쪽(가로 스크롤)만 그림, 아래·오른쪽은 custom.js가 추가 */
+:root {
+  --soft-shadow-size: 18px;
+  --soft-shadow: #{{ $v.header }};
+  --soft-shadow-mid: #{{ $v.header }}99;
+}
+.monaco-scrollable-element > .shadow.top,
+.monaco-editor .scroll-decoration {
+  left: 0 !important;
+  height: var(--soft-shadow-size) !important;
+  box-shadow: none !important;
+  background: linear-gradient(to bottom, var(--soft-shadow), var(--soft-shadow-mid) 45%, transparent);
+  pointer-events: none;
+}
+.monaco-scrollable-element > .shadow.left {
+  top: 0 !important;
+  width: var(--soft-shadow-size) !important;
+  box-shadow: none !important;
+  background: linear-gradient(to right, var(--soft-shadow), var(--soft-shadow-mid) 45%, transparent);
+  pointer-events: none;
+}
+.monaco-scrollable-element > .shadow.top.left {
+  background: linear-gradient(to bottom, var(--soft-shadow), var(--soft-shadow-mid) 45%, transparent),
+              linear-gradient(to right, var(--soft-shadow), var(--soft-shadow-mid) 45%, transparent);
+}
+.monaco-scrollable-element > .shadow.top-left-corner { display: none !important; }
+/* 탐색기 고정 줄 아래: 그림자 대신 사이드바 색 → 투명 페이드. 목록이 헤더 밑으로 녹아 들어가듯 보임 */
+.monaco-list .monaco-scrollable-element .monaco-tree-sticky-container .monaco-tree-sticky-container-shadow {
+  bottom: calc(-1 * var(--soft-shadow-size)) !important;
+  height: var(--soft-shadow-size) !important;
+  box-shadow: none !important;
+  background: linear-gradient(to bottom, var(--soft-shadow), var(--soft-shadow-mid) 45%, transparent);
+  pointer-events: none;
+}
+/* 아래쪽·오른쪽 그림자: custom.js가 스크롤바 위치로 "더 있음"을 판단해 클래스를 붙임 */
+.monaco-scrollable-element.cus-more-bottom::after,
+.monaco-scrollable-element.cus-more-right::before {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  z-index: 12;
+}
+.monaco-scrollable-element.cus-more-bottom::after {
+  left: 0; right: 0; bottom: 0;
+  height: var(--soft-shadow-size);
+  background: linear-gradient(to top, var(--soft-shadow), var(--soft-shadow-mid) 45%, transparent);
+}
+.monaco-scrollable-element.cus-more-right::before {
+  top: 0; bottom: 0; right: 0;
+  width: var(--soft-shadow-size);
+  background: linear-gradient(to left, var(--soft-shadow), var(--soft-shadow-mid) 45%, transparent);
+}
+
+/* 섹션 헤더(탐색기의 프로젝트 이름 줄, 검색·Git 등 다른 탭의 섹션 줄): 고정 줄과 같은 solid 색.
+   헤더 + 고정 줄이 하나의 불투명 헤더 블록이 되고, 그 아래 목록은 블러 + 페이드로 이어짐 */
+.monaco-workbench .pane-composite-part .monaco-pane-view .pane > .pane-header,
+/* 탭 제목 줄("탐색기" …)과 그 위 탭 아이콘 줄도 같은 헤더 블록으로 */
+.monaco-workbench .pane-composite-part > .title,
+.monaco-workbench .pane-composite-part > .header-or-footer.header {
+  background-color: #{{ $v.header }} !important;
+}
+
+/* 터미널 안쪽 여백: Ghostty window-padding-x = 8, window-padding-y = 6 */
+.monaco-workbench .terminal-wrapper .xterm { padding: 6px 8px; }
+
+/* 줄 맨 앞에 커서가 하나 더 보이는 문제: 입력용 숨은 요소(native-edit-context)의
+   macOS 기본 텍스트 커서가 보임 → 투명하게. 실제 커서는 VS Code가 따로 그림 */
+.monaco-editor .native-edit-context,
+.monaco-editor .inputarea { caret-color: transparent !important; }
+
+/* 모달 에디터(설정·확장 상세 등): 에디터 배경이 투명이라 뒤 코드가 비침 → 불투명 + 둥근 모서리,
+   뒤 화면은 흐리게 */
+.monaco-modal-editor-block { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.monaco-modal-editor-block .modal-editor-shadow { border-radius: var(--r-lg) !important; }
+.monaco-modal-editor-block .modal-editor-part,
+.monaco-modal-editor-block .modal-editor-sidebar { background-color: #{{ $v.header }} !important; }
+
+/* 괄호 짝 글자 굵게 (고정폭이라 폭은 그대로) */
+.monaco-editor .bracket-match-inline { font-weight: 700 !important; }

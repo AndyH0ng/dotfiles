@@ -18,3 +18,7 @@ scripts
 .local/agent-bin
 .local/bin/agent-sleep-guard
 {{- end }}
+{{- if not (index .install "ide") }}
+Library/Application Support/Code
+.config/vscode
+{{- end }}

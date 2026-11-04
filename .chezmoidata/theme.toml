@@ -39,3 +39,9 @@ cask = "font-d2coding"
 [[theme.font.families]]
 name = "Symbols Nerd Font Mono"   # icons
 cask = "font-symbols-only-nerd-font"
+
+# VS Code chrome around the blurred (vibrancy) window; values measured on screen.
+[theme.vscode]
+chrome = "252526"            # macOS title bar material; the status bar is painted to match
+chrome_foreground = "cccccc" # title bar text
+header = "1c1d22"            # sidebar headers, sticky tree rows, modal editor, scroll fades

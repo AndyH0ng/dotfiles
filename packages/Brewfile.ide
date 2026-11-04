@@ -1,3 +1,5 @@
-cask "jetbrains-air"
-brew "python"                 # local Claude Code ACP bridge
+cask "visual-studio-code"
+vscode "subframe7536.custom-ui-style"   # loads ~/.config/vscode/custom.{css,js}
+vscode "alexanderbast.vscode-snazzy"    # workbench.colorTheme
+vscode "miguelsolorio.symbols"          # workbench.iconTheme
 brew "duti"                   # default apps (.chezmoidata/macos.toml)
