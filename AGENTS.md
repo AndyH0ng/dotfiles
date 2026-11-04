@@ -31,10 +31,11 @@ The repo targets **Apple Silicon macOS** only. `/opt/homebrew` is hardcoded on p
 | `run_onchange_before_install-packages.sh.tmpl` | brew bundle, tap trust, uv tools, gh/codex telemetry, Claude Code MCP servers, git hooks path |
 | `run_onchange_after_macos-defaults.sh.tmpl` | `defaults write` and `duti -s` for each entry in `macos.toml`, then relaunches apps |
 | `run_after_agent-sleep-guard.sh.tmpl` | Installs the shared lid-close sleep guard for Claude Code or Codex; removes it only when both groups are off. Root setup requires a real terminal; CI skips it |
+| `run_onchange_after_hangul-capslock.sh.tmpl` | Runs `hangul-capslock install` when the script changes: Caps Lock → F18 via `hidutil` (re-applied at login by a LaunchAgent), F18 → "next input source" (61, switches on key down; 60 switches on key up and drops the first letter). CI skips it |
 | `run_onchange_after_setup.sh.tmpl` | `mise install --locked`, tinty theme |
 | `dot_config/mise/mise.lock` | Exact runtime versions + checksums that `latest`/`lts` resolve to |
 | `claude-settings.json` | Source for `~/.claude/settings.json` (see below) |
-| `dot_local/bin/` | `claude-sync`, `dotfiles-doctor`, `agent-sleep-guard` |
+| `dot_local/bin/` | `claude-sync`, `dotfiles-doctor`, `agent-sleep-guard`, `hangul-capslock` |
 | `dot_local/agent-bin/` | Shared agent `rm` → Trash. PATH selection uses `$CLAUDECODE` or `DOTFILES_AGENT=codex`, including login-shell reordering |
 | `.githooks/lint` | shellcheck (rendered scripts), actionlint, zizmor, ruff and agent regression tests. Run by pre-commit **and** CI |
 | `.githooks/pre-commit` | `.githooks/lint`, then gitleaks on staged changes |

@@ -1,0 +1,79 @@
+#!/bin/bash
+# Caps Lock 한영 전환 씹힘 해결: Caps Lock → F18 (hidutil), F18 → "다음 입력 소스 선택".
+# "이전 입력 소스"(60)는 키를 뗄 때 전환돼 빠른 타이핑에서 첫 글자가 이전 언어로 들어간다.
+# 61은 누를 때 전환. 언어 팝업 끄기는 .chezmoidata/macos.toml에 있다.
+set -euo pipefail
+
+LABEL=local.hangul-capslock
+PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
+MAPPING='{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x700000039,"HIDKeyboardModifierMappingDst":0x70000006D}]}'
+ACTIVATE=/System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings
+
+# 61 = Select next source in Input menu. F18: charCode 65535, keyCode 79, fn flag 8388608.
+set_hotkey() { # id charCode keyCode modifiers
+	defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add "$1" \
+		"<dict><key>enabled</key><true/><key>value</key><dict><key>type</key><string>standard</string><key>parameters</key><array><integer>$2</integer><integer>$3</integer><integer>$4</integer></array></dict></dict>"
+	[[ -x $ACTIVATE ]] && "$ACTIVATE" -u >/dev/null 2>&1 || true
+}
+
+apply() { hidutil property --set "$MAPPING" >/dev/null; }
+
+install() {
+	apply
+	set_hotkey 61 65535 79 8388608
+
+	local tmp
+	tmp=$(mktemp)
+	cat >"$tmp" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>$LABEL</string>
+  <key>ProgramArguments</key><array><string>/usr/bin/hidutil</string><string>property</string><string>--set</string><string>$MAPPING</string></array>
+  <key>RunAtLoad</key><true/>
+</dict>
+</plist>
+EOF
+	if ! cmp -s "$tmp" "$PLIST" || ! launchctl print "gui/$(id -u)/$LABEL" >/dev/null 2>&1; then
+		mkdir -p "$(dirname "$PLIST")"
+		mv "$tmp" "$PLIST"
+		launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null || true
+		launchctl bootstrap "gui/$(id -u)" "$PLIST"
+	else
+		rm -f "$tmp"
+	fi
+	echo "hangul-capslock: Caps Lock = 한영 전환(F18)"
+}
+
+uninstall() {
+	launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null || true
+	rm -f "$PLIST"
+	hidutil property --set '{"UserKeyMapping":[]}' >/dev/null
+	set_hotkey 61 32 49 786432 # macOS 기본값 ⌃⌥Space
+	echo "hangul-capslock: 제거 완료 (chezmoi apply가 다시 설치하지 않게 run_onchange_after_hangul-capslock.sh.tmpl도 지울 것)"
+}
+
+status() {
+	echo "== hidutil 매핑"
+	# Dst 30064771181 = 0x70000006D (F18)
+	if [[ $(hidutil property --get UserKeyMapping) == *30064771181* ]]; then
+		echo "Caps Lock → F18"
+	else
+		echo "(없음)"
+	fi
+	echo "== 단축키 61 (다음 입력 소스)"
+	/usr/libexec/PlistBuddy -c 'Print :AppleSymbolicHotKeys:61' \
+		"$HOME/Library/Preferences/com.apple.symbolichotkeys.plist" 2>/dev/null | tr -s ' \n' ' '
+	echo
+	echo "== 언어 팝업: $(defaults read -g TSMLanguageIndicatorEnabled 2>/dev/null || echo '켜짐(기본)')"
+	echo "== LaunchAgent: $(launchctl print "gui/$(id -u)/$LABEL" >/dev/null 2>&1 && echo 로드됨 || echo 없음)"
+}
+
+case "${1:-}" in
+install | uninstall | status | apply) "$1" ;;
+*)
+	echo "usage: ${0##*/} install|uninstall|status|apply" >&2
+	exit 2
+	;;
+esac

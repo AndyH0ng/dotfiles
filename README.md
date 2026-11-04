@@ -33,6 +33,7 @@ Git 이름과 이메일은 최초 `chezmoi init`에서 입력한다. 기존 Git 
 - **Claude Code**: `settings.json`(플러그인, 테마, 상태바)과 base16-snazzy [상태바](dot_claude/executable_statusline.sh.tmpl), canary 그룹이면 실행 중인 Chrome Canary에 붙는 chrome-devtools MCP(`chrome://inspect/#remote-debugging`에서 원격 디버깅을 켜야 함)
 - **Codex**: CLI와 전역 `AGENTS.md`, [`codex.toml`](.chezmoidata/codex.toml)의 관리 설정을 `~/.codex/config.toml`에 병합한다. 모델 선택·프로젝트 신뢰·개인 MCP·인증 설정은 로컬에 유지한다. 비로그인 셸에서도 Homebrew와 mise 런타임을 사용할 수 있다
 - **macOS 설정**: 키 반복, 텍스트 자동 치환 끄기, Finder 경로 막대, 네트워크·USB에 `.DS_Store` 안 만들기, ide 그룹이면 코드 파일 기본 앱을 VS Code로(duti) 등. 목록은 [`.chezmoidata/macos.toml`](.chezmoidata/macos.toml) 한 곳에 있다
+- **한영 전환**: Caps Lock을 누르는 즉시 한영이 바뀌어 바로 이어 쳐도 씹히지 않는다. 대문자 고정은 Shift로 대신한다. `hangul-capslock status`로 확인, `uninstall`로 되돌린다
 - **프라이버시**: Homebrew, gh, Claude Code, Codex, CodeRabbit, 주요 JS 도구의 텔레메트리 끔. 목록은 [`.chezmoidata/telemetry.toml`](.chezmoidata/telemetry.toml) 한 곳에 있다
 
 ## 수정하기

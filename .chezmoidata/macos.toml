@@ -32,6 +32,12 @@ domain = "NSGlobalDomain"
 key = "NSAutomaticQuoteSubstitutionEnabled"
 value = false
 
+# input-source popup next to the cursor; Sonoma+ switches only after it fades
+[[macos.defaults]]
+domain = "NSGlobalDomain"
+key = "TSMLanguageIndicatorEnabled"
+value = false
+
 [[macos.defaults]]
 domain = "com.apple.finder"
 key = "ShowPathbar"

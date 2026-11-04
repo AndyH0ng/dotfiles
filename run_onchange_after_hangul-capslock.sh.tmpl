@@ -1,0 +1,7 @@
+#!/bin/bash
+# Reruns when the script changes: {{ include "dot_local/bin/executable_hangul-capslock" | sha256sum }}
+# CI has no login session.
+set -euo pipefail
+[ -n "${CI:-}" ] && exit 0
+
+"$HOME/.local/bin/hangul-capslock" install
