@@ -28,8 +28,8 @@ base0F = "b2643c"
 # A cask may live in an optional group Brewfile instead (e.g. a font from a private release).
 [theme.font]
 size = 14
-style = "Light"
-style_italic = "Light Italic"
+style = "Regular"
+style_italic = "Italic"
 features = []           # e.g. "-calt" turns the font's ligatures off
 
 [[theme.font.families]]

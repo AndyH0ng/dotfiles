@@ -31,7 +31,7 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply --source ~/dotfiles AndyH0n
 | 영역 | 구성 |
 |---|---|
 | 쉘 | zsh + [antidote](https://github.com/mattmc3/antidote)(fzf-tab, autosuggestions, completions, zsh-abbr), [starship](https://starship.rs), [zsh-patina](https://github.com/michel-kraemer/zsh-patina) |
-| 터미널 | [Ghostty](https://ghostty.org), LigaSFMono Nerd Font + Pretendard, Light, 합자 켬 |
+| 터미널 | [Ghostty](https://ghostty.org), LigaSFMono Nerd Font + Pretendard, 합자 켬 |
 | 테마 | base16-snazzy. [theme.toml](.chezmoidata/theme.toml) 한 곳에서 Ghostty·starship·Claude 상태바·[tinty](https://github.com/tinted-theming/tinty)·vivid·VS Code에 적용 |
 | 도구 | mise, zoxide, fzf, atuin, eza, bat, fd, xh, fastfetch, `grep`/`find` → [ugrep](https://ugrep.com)/[bfs](https://github.com/tavianator/bfs) |
 | Python | uv, ruff, [pyrefly](https://pyrefly.org) |
