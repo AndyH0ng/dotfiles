@@ -32,3 +32,7 @@ description = "AdGuard/Notion/LaunchOS/Figma"
 [[groups]]
 name = "fonts"
 description = "Pretendard/SF"
+
+[[groups]]
+name = "safari"
+description = "Safari 27 built-in MCP for Claude Code/Codex"

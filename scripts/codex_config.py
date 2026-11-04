@@ -54,6 +54,7 @@ def render(current, data, telemetry_only=False):
         for group, name, key in (
             ("canary", "chrome-devtools", "chrome_devtools"),
             ("imcp", "iMCP", "imcp"),
+            ("safari", "safari-mcp", "safari"),
         ):
             spec = data["mcp"][key]
             if data.get("install", {}).get(group, False):

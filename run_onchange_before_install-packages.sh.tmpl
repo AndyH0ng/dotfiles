@@ -62,4 +62,12 @@ if command -v claude >/dev/null 2>&1; then
 fi
 {{- end }}
 
+{{- if and (index .install "claude") (index .install "safari") }}
+if command -v claude >/dev/null 2>&1; then
+  claude mcp remove safari-mcp -s user >/dev/null 2>&1 || true
+  claude mcp add safari-mcp -s user -- \
+    {{ .mcp.safari.command | quote }}{{ range .mcp.safari.args }} {{ . | quote }}{{ end }}
+fi
+{{- end }}
+
 git -C "{{ .chezmoi.sourceDir }}" config core.hooksPath .githooks

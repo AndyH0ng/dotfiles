@@ -51,6 +51,14 @@ chezmoi는 심링크 모드로 동작한다. `~/.zshrc` 같은 일반 파일은 
 
 Claude 또는 Codex 그룹을 켜면 에이전트 셸의 `rm`이 휴지통을 사용한다. 전역 작업 지침은 [`agents.toml`](.chezmoidata/agents.toml) 한 곳에서 정의하고, `chezmoi apply`가 양쪽 클라이언트의 관리 블록을 갱신한다. 블록 밖의 기존 개인 지침은 보존한다. 잠자기 guard도 두 클라이언트가 공유한다. Codex는 실험 기능인 `prevent_idle_sleep`을 켜고, guard가 실제 macOS 잠자기 방지 요청을 감지한다. guard의 시스템 설치는 처음 한 번 실제 터미널에서 `chezmoi apply`로 sudo 승인이 필요하다.
 
+## Safari 연결 (공식 MCP)
+
+`safari` 그룹을 켜면 Claude Code와 Codex에 `/usr/bin/safaridriver --mcp`를 등록한다. macOS에 포함된 Safari 27 이상이 필요하며 별도 패키지는 설치하지 않는다.
+
+기존 Mac에서는 `chezmoi init`에서 safari를 선택하고 `chezmoi apply`한다. Safari 설정 → 고급에서 웹 개발자용 기능을 표시한 뒤 개발자 설정에서 원격 자동화 및 외부 에이전트 허용을 켠다. 이 권한은 Mac별로 직접 설정한다.
+
+[WebKit 공식 안내](https://webkit.org/blog/18136/introducing-the-safari-mcp-server-for-web-developers/)
+
 ## Chrome Canary 연결 (chrome-devtools MCP)
 
 Claude Code와 Codex의 chrome-devtools MCP는 **이미 켜져 있는 Chrome Canary(로그인된 프로필)에 붙는다.** 두 클라이언트는 [같은 명령](.chezmoidata/mcp.toml)을 사용한다. Claude는 설치 스크립트가 등록하고, Codex는 설정 병합으로 등록한다.

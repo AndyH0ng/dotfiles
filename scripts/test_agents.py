@@ -23,9 +23,9 @@ for path in (ROOT / ".chezmoidata").glob("*.toml"):
     DATA.update(tomllib.loads(path.read_text()))
 
 
-def settings(codex=True, canary=True, imcp=False):
+def settings(codex=True, canary=True, imcp=False, safari=False):
     data = copy.deepcopy(DATA)
-    data["install"] = {"codex": codex, "canary": canary, "imcp": imcp}
+    data["install"] = {"codex": codex, "canary": canary, "imcp": imcp, "safari": safari}
     return data
 
 
@@ -112,6 +112,26 @@ enabled = true # previously enabled
         self.assertEqual(
             tomlkit.parse(render(local, settings()))["mcp_servers"]["iMCP"]["command"],
             "personal-command",
+        )
+
+    def test_safari_toggle_preserves_private_transport(self):
+        doc = tomlkit.parse(render("", settings(safari=True)))
+        server = doc["mcp_servers"]["safari-mcp"]
+        self.assertEqual(server["command"], "/usr/bin/safaridriver")
+        self.assertEqual(server["args"], ["--mcp"])
+        self.assertTrue(server["enabled"])
+        server["env"] = {"LOCAL_SETTING": "keep"}
+        disabled = tomlkit.parse(render(tomlkit.dumps(doc), settings()))
+        self.assertFalse(disabled["mcp_servers"]["safari-mcp"]["enabled"])
+        self.assertEqual(disabled["mcp_servers"]["safari-mcp"]["env"]["LOCAL_SETTING"], "keep")
+        local = '[mcp_servers.safari-mcp]\ncommand="personal-command"\n'
+        self.assertEqual(
+            tomlkit.parse(render(local, settings()))["mcp_servers"]["safari-mcp"]["command"],
+            "personal-command",
+        )
+        self.assertNotIn(
+            "safari-mcp",
+            tomlkit.parse(render("", settings(codex=False, safari=True))).get("mcp_servers", {}),
         )
 
     def test_invalid_config_fails_instead_of_replacing_it(self):

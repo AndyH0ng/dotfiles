@@ -6,3 +6,8 @@ args = ["chrome-devtools-mcp@latest", "--autoConnect", "--channel", "canary", "-
 # Bundled in the iMCP app (packages/Brewfile.imcp). Shared by Claude Code and Codex.
 [mcp.imcp]
 command = "/Applications/iMCP.app/Contents/MacOS/imcp-server"
+
+# Built into Safari 27 or later. No third-party server or runtime required.
+[mcp.safari]
+command = "/usr/bin/safaridriver"
+args = ["--mcp"]
