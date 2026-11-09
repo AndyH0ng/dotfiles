@@ -22,7 +22,7 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply --source ~/dotfiles AndyH0n
 | [canary](packages/Brewfile.canary) | Chrome Canary | chrome-devtools MCP 등록 |
 | [safari](packages/Brewfile.safari) | 없음 (Safari 27 내장) | Safari MCP 등록 |
 | [apps](packages/Brewfile.apps) | wBlock, Notion, LaunchOS, Figma | |
-| [fonts](packages/Brewfile.fonts) | SF 폰트, LigaSFMono Nerd Font | 비공개 tap, `gh` 로그인 필요 |
+| [fonts](packages/Brewfile.fonts) | SF 폰트, SUIT, SUITE, LigaSFMono Nerd Font | 비공개 tap, `gh` 로그인 필요 |
 
 선택을 바꾸려면 `chezmoi init --prompt` 후 `chezmoi apply`. 그룹을 꺼도 설치된 패키지는 지우지 않는다.
 

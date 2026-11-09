@@ -27,7 +27,7 @@ description = "wBlock/Notion/LaunchOS/Figma"
 
 [[groups]]
 name = "fonts"
-description = "SF fonts and LigaSFMono Nerd Font"
+description = "SF fonts/SUIT/SUITE and LigaSFMono Nerd Font"
 
 [[groups]]
 name = "safari"
